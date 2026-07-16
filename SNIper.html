@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SNIPER AOF</title>
+<style>
+:root{
+  --bg:#07070B;--bg2:#0C0C13;--bg3:#121219;--bg4:#171720;
+  --g:rgba(20,20,30,0.75);--g2:rgba(28,28,42,0.9);
+  --rim:rgba(255,255,255,0.055);--rim2:rgba(255,255,255,0.10);--rim3:rgba(255,255,255,0.18);
+  --gold:#CFA94E;--gold2:#EDD07A;--gold3:#9A7B30;
+  --gd:rgba(207,169,78,0.12);--gg:rgba(207,169,78,0.06);
+  --green:#2BD55A;--gnd:rgba(43,213,90,0.12);
+  --red:#FF3830;--rd:rgba(255,56,48,0.12);
+  --blue:#1283FF;--bd:rgba(18,131,255,0.12);
+  --amber:#FF9A00;--amd:rgba(255,154,0,0.12);
+  --purple:#BF5AF2;--prd:rgba(191,90,242,0.12);
+  --t1:#EEEEF2;--t2:rgba(238,238,242,0.58);--t3:rgba(238,238,242,0.33);
+  --r1:10px;--r2:16px;--r3:22px;--r4:28px;--r5:36px;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+  --f:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;
+  --fm:"SF Mono","Fira Code",monospace;
+  --sp:cubic-bezier(.34,1.56,.64,1);--ez:cubic-bezier(.16,1,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:#000}
+body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+input,select,textarea,button{font-family:inherit}
+button{cursor:pointer;border:none;background:none}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--rim2);border-radius:3px}
+
+/* SHELL */
+.shell{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg2);position:relative}
+.safetop{height:calc(var(--st)+4px)}
+
+/* NAV */
+.nav{
+  padding:10px 18px 12px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;
+  background:rgba(7,7,11,0.85);
+  backdrop-filter:blur(32px) saturate(1.8);-webkit-backdrop-filter:blur(32px) saturate(1.8);
+  border-bottom:1px solid var(--rim);
+}
+.nbrand{display:flex;align-items:center;gap:11px}
+.nlogo{
+  width:36px;height:36px;border-radius:11px;
+  background:linear-gradient(140deg,var(--gold) 0%,var(--gold3) 100%);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 0 0 1px rgba(207,169,78,.22),0 6px 20px rgba(207,169,78,.20);
+}
+.ntitle{font-size:17px;font-weight:900;letter-spacing:-.5px}
+.nsub{font-size:10px;color:var(--gold);font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin-top:1px}
+.nacts{display:flex;gap:7px}
+.nbtn{
+  width:36px;height:36px;background:var(--g);border:1px solid var(--rim);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--t2);
+  transition:all .16s var(--ez);
+}
+.nbtn:active{transform:scale(.88);background:var(--g2)}
+
+/* TABBAR */
+.tabbar{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;
+  padding:8px 8px calc(var(--sb)+8px);
+  background:rgba(7,7,11,.92);
+  backdrop-filter:blur(36px) saturate(1.6);-webkit-backdrop-filter:blur(36px) saturate(1.6);
+  border-top:1px solid var(--rim);display:flex;gap:1px;z-index:200;
+}
+.ti{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border-radius:var(--r1);color:var(--t3);cursor:pointer;transition:all .16s var(--ez);position:relative}
+.ti.on{color:var(--gold)}
+.ti:active{transform:scale(.88)}
+.tiico{font-size:21px;line-height:1}
+.tilbl{font-size:10px;font-weight:700;letter-spacing:.2px}
+.tibar{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--gold);border-radius:2px;opacity:0;transition:opacity .16s}
+.ti.on .tibar{opacity:1}
+
+/* PAGES */
+.pages{flex:1;padding-bottom:calc(82px + var(--sb));overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pg{display:none;animation:pgup .34s var(--ez)}
+.pg.on{display:block}
+@keyframes pgup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION */
+.sec{padding:18px 16px 0}
+.sechd{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.secttl{font-size:11px;font-weight:800;color:var(--t3);text-transform:uppercase;letter-spacing:1.1px}
+.secact{font-size:13px;font-weight:700;color:var(--gold);cursor:pointer}
+.card{background:var(--g);border-radius:var(--r3);border:1px solid var(--rim);overflow:hidden}
+.sp{height:18px}
+.ln{height:1px;background:var(--rim);margin:0 16px}
+
+/* ══ DASHBOARD ══ */
+@keyframes shimmer{
+  0%{transform:translateX(-100%) skewX(-15deg)}
+  100%{transform:translateX(300%) skewX(-15deg)}
+}
+.hero{
+  margin:14px 16px 0;padding:24px 20px;
+  background:linear-gradient(148deg,rgba(207,169,78,.12) 0%,rgba(207,169,78,.04) 45%,transparent 100%);
+  border-radius:var(--r4);
+  border:1px solid rgba(207,169,78,.22);
+  position:relative;overflow:hidden;
+  box-shadow:0 1px 0 rgba(207,169,78,.12) inset,0 20px 60px rgba(0,0,0,.3);
+}
+.hero::before{
+  content:'';position:absolute;top:-90px;right:-70px;
+  width:260px;height:260px;
+  background:radial-gradient(circle,rgba(207,169,78,.11) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;top:0;left:0;bottom:0;
+  width:60px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);
+  animation:shimmer 4s ease-in-out infinite;
+  pointer-events:none;
+}
+.hlbl{
+  font-size:11px;font-weight:800;color:var(--gold);letter-spacing:2.5px;
+  text-transform:uppercase;margin-bottom:8px;opacity:.85;
+}
+.hprice{
+  font-size:52px;font-weight:900;letter-spacing:-3px;line-height:1;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 40px rgba(207,169,78,.15);
+}
+.hprice sup{font-size:22px;font-weight:400;color:var(--t3);vertical-align:top;margin-top:12px;margin-right:3px;letter-spacing:0}
+.hrow{display:flex;align-items:center;gap:10px;margin-top:11px}
+.hbadge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:800}
+.hbadge.up{background:var(--gnd);color:var(--green)}
+.hbadge.dn{background:var(--rd);color:var(--red)}
+.hts{font-size:12px;color:var(--t3)}
+
+.sesrow{display:flex;gap:7px;padding:0 16px;margin-top:11px}
+.seschip{flex:1;background:var(--g);border:1px solid var(--rim);border-radius:var(--r2);padding:10px 7px;text-align:center;transition:all .2s}
+.seschip.live{border-color:rgba(207,169,78,.32);background:rgba(207,169,78,.07)}
+.sest{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.3px}
+.sesn{font-size:12px;font-weight:700;color:var(--t2);margin-top:3px}
+.seschip.live .sesn{color:var(--gold)}
+.dot{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:5px;animation:blink 2s ease-in-out infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.scard{background:var(--g);border-radius:var(--r2);border:1px solid var(--rim);padding:15px;position:relative;overflow:hidden}
+.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.scard.sg::before{background:linear-gradient(90deg,var(--green),#22ff66)}
+.scard.sr::before{background:linear-gradient(90deg,var(--red),#ff6b60)}
+.scard.sau::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.scard.sb::before{background:linear-gradient(90deg,var(--blue),#5bb5ff)}
+.slbl{font-size:10px;font-weight:800;color:var(--t3);letter-spacing:.6px;text-transform:uppercase}
+.sval{font-size:26px;font-weight:900;letter-spacing:-.8px;margin-top:5px;font-variant-numeric:tabular-nums}
+.sval.sg{color:var(--green)}.sval.sr{color:var(--red)}.sval.sau{color:var(--gold)}.sval.sb{color:var(--blue)}
+.ssub{font-size:11px;color:var(--t3);margin-top:3px}
+
+.eqwrap{background:var(--g);border-radius:var(--r3);border:1px solid var(--rim);padding:18px}
+.eqhd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.eqlbl{font-size:13px;font-weight:700;color:var(--t2)}
+.eqval{font-size:23px;font-weight:900;letter-spacing:-.6px;margin-top:3px;font-variant-numeric:tabular-nums}
+.eqsub{font-size:11px;color:var(--t3);text-align:right;margin-top:3px}
+canvas#eqc{width:100%!important;height:88px!important;display:block}
+
+.trow{display:flex;align-items:center;padding:13px 16px;gap:12px;cursor:pointer;transition:background .12s}
+.trow:active{background:rgba(255,255,255,.022)}
+.trow+.trow{border-top:1px solid var(--rim)}
+.dpill{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
+.dpill.buy{background:var(--gnd);color:var(--green)}
+.dpill.sell{background:var(--rd);color:var(--red)}
+.tmeta{flex:1;min-width:0}
+.tname{font-size:15px;font-weight:700}
+.tsub{font-size:12px;color:var(--t3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gpill{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0}
+.gpill.g1{background:rgba(43,213,90,.18);color:var(--green)}
+.gpill.g2{background:var(--bd);color:var(--blue)}
+.gpill.g3{background:var(--amd);color:var(--amber)}
+.gpill.g4{background:var(--rd);color:var(--red)}
+.gpill.g-{background:var(--bg4);color:var(--t3)}
+.pnl{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0}
+.pnl.pos{color:var(--green)}.pnl.neg{color:var(--red)}
+
+/* ══ PRE-FLIGHT PAGE ══ */
+.pfhd{padding:20px 16px 4px}
+.pfttl{font-size:25px;font-weight:900;letter-spacing:-.6px}
+.pfsub{font-size:13px;color:var(--t3);margin-top:3px}
+
+/* PLAN SELECTOR — 3 col cards matching sketch */
+.plan-wrap{padding:14px 16px 0}
+.plan-lbl{font-size:11px;font-weight:900;color:var(--t3);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.plan-lbl::before{content:'';flex:1;height:1px;background:var(--rim)}
+.plan-lbl::after{content:'';flex:1;height:1px;background:var(--rim)}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+
+.pcard{
+  display:flex;flex-direction:column;align-items:center;padding:18px 8px 16px;
+  background:var(--g);border:1.5px solid var(--rim);border-radius:var(--r3);
+  cursor:pointer;transition:all .25s var(--ez);position:relative;
+  -webkit-user-select:none;user-select:none;text-align:center;overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+.pcard::before{
+  content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:80px;height:80px;border-radius:50%;opacity:0;
+  transition:opacity .35s var(--ez);pointer-events:none;filter:blur(20px);
+}
+.pcard[data-t="CHoCH"]::before{background:var(--blue)}
+.pcard[data-t="EMAX"]::before{background:var(--green)}
+.pcard[data-t="W"]::before{background:var(--gold)}
+.pcard.on::before{opacity:.25}
+.pcard:active{transform:scale(.92)}
+
+/* selected states */
+.pcard[data-t="CHoCH"].on{
+  border-color:var(--blue);background:rgba(18,131,255,.09);
+  box-shadow:0 0 0 1px rgba(18,131,255,.2),0 14px 36px rgba(18,131,255,.12),inset 0 1px 0 rgba(18,131,255,.15);
+  transform:translateY(-2px);
+}
+.pcard[data-t="EMAX"].on{
+  border-color:var(--green);background:rgba(43,213,90,.09);
+  box-shadow:0 0 0 1px rgba(43,213,90,.2),0 14px 36px rgba(43,213,90,.12),inset 0 1px 0 rgba(43,213,90,.15);
+  transform:translateY(-2px);
+}
+.pcard[data-t="W"].on{
+  border-color:var(--gold);background:rgba(207,169,78,.09);
+  box-shadow:0 0 0 1px rgba(207,169,78,.25),0 14px 36px rgba(207,169,78,.12),inset 0 1px 0 rgba(207,169,78,.15);
+  transform:translateY(-2px);
+}
+
+.pcard-ico{
+  width:52px;height:52px;border-radius:17px;border:1.5px solid var(--rim2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;font-family:var(--fm);
+  margin-bottom:11px;transition:transform .25s var(--sp);
+  box-shadow:0 4px 12px rgba(0,0,0,.25);
+}
+.pcard.on .pcard-ico{transform:scale(1.12) rotate(-3deg)}
+.pcard-name{font-size:13px;font-weight:900;color:var(--t1);line-height:1.2;margin-bottom:3px;letter-spacing:-.1px}
+.pcard-desc{font-size:9.5px;color:var(--t3);font-weight:500;line-height:1.45}
+.pcard.on .pcard-desc{color:var(--t2)}
+.pcard-dot{
+  width:8px;height:8px;border-radius:50%;border:1.5px solid var(--rim2);
+  margin-top:11px;transition:all .25s var(--sp);
+  position:relative;
+}
+.pcard-dot::after{
+  content:'';position:absolute;inset:-3px;border-radius:50%;
+  opacity:0;transition:opacity .25s;
+}
+.pcard[data-t="CHoCH"].on .pcard-dot{background:var(--blue);border-color:var(--blue);box-shadow:0 0 10px rgba(18,131,255,.7)}
+.pcard[data-t="CHoCH"].on .pcard-dot::after{background:rgba(18,131,255,.25);opacity:1;border-radius:50%}
+.pcard[data-t="EMAX"].on .pcard-dot{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(43,213,90,.7)}
+.pcard[data-t="EMAX"].on .pcard-dot::after{background:rgba(43,213,90,.25);opacity:1;border-radius:50%}
+.pcard[data-t="W"].on .pcard-dot{background:var(--gold);border-color:var(--gold);box-shadow:0 0 10px rgba(207,169,78,.7)}
+.pcard[data-t="W"].on .pcard-dot::after{background:rgba(207,169,78,.25);opacity:1;border-radius:50%}
+
+/* PLAN / FOMO toggle — premium segmented */
+.planfomo{
+  display:flex;gap:0;padding:14px 16px 0;
+  background:var(--bg3);border-radius:var(--r2);margin:10px 16px 0;
+  padding:4px;border:1px solid var(--rim);
+}
+.pf-btn{
+  flex:1;padding:13px 14px;border-radius:var(--r1);
+  font-size:14px;font-weight:800;color:var(--t3);
+  background:transparent;transition:all .25s var(--sp);cursor:pointer;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.pf-btn.plan-on{
+  background:rgba(43,213,90,.12);color:var(--green);
+  box-shadow:0 2px 12px rgba(43,213,90,.18),inset 0 1px 0 rgba(43,213,90,.2);
+  border-radius:var(--r1);
+}
+.pf-btn.fomo-on{
+  background:rgba(255,56,48,.12);color:var(--red);
+  box-shadow:0 2px 12px rgba(255,56,48,.18),inset 0 1px 0 rgba(255,56,48,.2);
+  border-radius:var(--r1);
+}
+
+/* CONFIRM CHECKLIST */
+.confirm-wrap{padding:12px 16px 0}
+.confirm-lbl{
+  font-size:11px;font-weight:900;color:var(--t3);letter-spacing:1.2px;
+  text-transform:uppercase;margin-bottom:11px;
+  display:flex;align-items:center;gap:7px;
+}
+.confirm-lbl::before,.confirm-lbl::after{content:'';flex:1;height:1px;background:var(--rim)}
+.cl-card{background:var(--g);border-radius:var(--r3);border:1px solid var(--rim);overflow:hidden}
+
+.ci{
+  display:flex;align-items:center;padding:13px 16px;gap:12px;
+  cursor:pointer;transition:background .12s;
+  -webkit-user-select:none;user-select:none;
+  position:relative;
+}
+.ci+.ci{border-top:1px solid var(--rim)}
+.ci:active{background:rgba(255,255,255,.022)}
+/* phase accent stripe */
+.ci[data-k="c1"],.ci[data-k="c2"]{border-left:2.5px solid var(--purple)}
+.ci[data-k="c3"],.ci[data-k="c4"]{border-left:2.5px solid var(--blue)}
+.ci[data-k="c5"],.ci[data-k="c6"]{border-left:2.5px solid var(--green)}
+.ci[data-k="c7"]{border-left:2.5px solid var(--gold)}
+.ci.ck[data-k="c1"],.ci.ck[data-k="c2"]{border-left-color:var(--purple);background:rgba(191,90,242,.04)}
+.ci.ck[data-k="c3"],.ci.ck[data-k="c4"]{border-left-color:var(--blue);background:rgba(18,131,255,.04)}
+.ci.ck[data-k="c5"],.ci.ck[data-k="c6"]{border-left-color:var(--green);background:rgba(43,213,90,.04)}
+.ci.ck[data-k="c7"]{border-left-color:var(--gold);background:rgba(207,169,78,.04)}
+
+.cbox{
+  width:22px;height:22px;border-radius:7px;border:2px solid var(--rim2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .2s var(--sp);font-size:11px;color:transparent;
+}
+.ci.ck .cbox{
+  background:var(--gold);border-color:var(--gold);color:#000;
+  transform:scale(1.08);
+  box-shadow:0 2px 8px rgba(207,169,78,.4);
+}
+.ci.ck .cbox::after{content:'✓';font-weight:900}
+.clbl{font-size:13.5px;font-weight:500;color:var(--t1);flex:1;line-height:1.35;transition:color .14s}
+.ci.ck .clbl{color:var(--t3);text-decoration:line-through}
+.ctag{font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;flex-shrink:0;white-space:nowrap}
+.ct-h1{background:var(--prd);color:var(--purple)}
+.ct-m5{background:var(--bd);color:var(--blue)}
+.ct-choch{background:rgba(18,131,255,.18);color:#5bbfff}
+.ct-fvg{background:var(--gd);color:var(--gold)}
+.ct-rsi{background:var(--amd);color:var(--amber)}
+.ct-ema{background:var(--gnd);color:var(--green)}
+.ct-pa{background:var(--prd);color:var(--purple)}
+
+/* RING PROGRESS */
+.ring-bar{
+  background:var(--g);border-radius:var(--r2);border:1px solid var(--rim);
+  padding:14px 16px;display:flex;align-items:center;gap:15px;margin:12px 16px 0;
+}
+.rsvgw{position:relative;width:48px;height:48px;flex-shrink:0}
+.rsvg{transform:rotate(-90deg)}
+.rbg{fill:none;stroke:var(--rim2);stroke-width:3.5}
+.rfg{fill:none;stroke:var(--gold);stroke-width:3.5;stroke-linecap:round;stroke-dasharray:126;stroke-dashoffset:126;transition:stroke-dashoffset .44s var(--ez)}
+.rfg.full{stroke:var(--green)}
+.rpct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+.rinfo{flex:1}
+.rlbl{font-size:14px;font-weight:700}
+.rsub{font-size:12px;color:var(--t3);margin-top:2px}
+.rbadge{padding:5px 11px;border-radius:20px;font-size:12px;font-weight:800}
+.rb-no{background:var(--rd);color:var(--red)}
+.rb-pt{background:var(--amd);color:var(--amber)}
+.rb-ok{background:var(--gnd);color:var(--green)}
+
+/* WARN */
+.warn{
+  margin:12px 16px 0;padding:12px 14px;
+  background:rgba(255,56,48,.07);border:1.5px solid rgba(255,56,48,.20);border-radius:var(--r2);
+  display:flex;align-items:flex-start;gap:10px;
+}
+.wico{font-size:16px;flex-shrink:0;padding-top:1px}
+.wttl{font-size:11px;font-weight:800;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.wbody{font-size:12px;font-weight:600;color:var(--t1);line-height:1.5}
+.wsub{font-size:11px;color:var(--t3);font-weight:400;margin-top:2px}
+
+/* FORM ELEMENTS */
+.fg{padding:0 16px;margin-top:13px}
+.fglbl{font-size:11px;font-weight:800;color:var(--t3);letter-spacing:1.1px;text-transform:uppercase;margin-bottom:8px}
+.icard{background:var(--g);border-radius:var(--r3);border:1px solid var(--rim);overflow:hidden}
+.irow{display:flex;align-items:center;padding:0 16px;min-height:54px;gap:12px}
+.irow+.irow{border-top:1px solid var(--rim)}
+.ilbl{font-size:14px;font-weight:600;color:var(--t2);min-width:84px;flex-shrink:0}
+.irow input,.irow select{flex:1;background:none;border:none;outline:none;font-size:15px;font-weight:700;color:var(--t1);text-align:right;padding:0;-webkit-appearance:none;min-width:0}
+.irow input::placeholder{color:var(--t3);font-weight:400;font-size:14px}
+.irow select option{background:var(--bg3)}
+
+/* BUY/SELL */
+.dirtgl{display:flex;gap:5px;background:var(--bg3);padding:5px;border-radius:14px}
+.dirbtn{flex:1;padding:11px;border-radius:10px;font-size:14px;font-weight:800;color:var(--t3);transition:all .22s var(--sp);text-align:center;cursor:pointer}
+.dirbtn.on.buy{background:var(--green);color:#000;box-shadow:0 4px 16px rgba(43,213,90,.28)}
+.dirbtn.on.sell{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(255,56,48,.28)}
+
+/* MULTI-ORDER from sketch — luxury upgrade */
+.ord-block{
+  background:var(--g);border-radius:var(--r3);border:1px solid var(--rim);overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+.ord-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;border-bottom:1px solid var(--rim);
+  background:linear-gradient(90deg,rgba(207,169,78,.06) 0%,transparent 100%);
+}
+.ord-hdttl{font-size:13px;font-weight:800;color:var(--t2)}
+.avg-box{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(207,169,78,.08);border:1px solid rgba(207,169,78,.18);
+  padding:5px 12px;border-radius:20px;
+}
+.avg-lbl{font-size:11px;color:var(--gold);font-weight:700;letter-spacing:.5px}
+.avg-val{font-size:16px;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums}
+.ord-row{
+  display:flex;align-items:center;padding:11px 16px;gap:11px;
+  transition:background .12s;
+}
+.ord-row+.ord-row{border-top:1px solid var(--rim)}
+.ord-row:focus-within{background:rgba(207,169,78,.03)}
+.ord-num{
+  width:26px;height:26px;border-radius:9px;
+  background:var(--bg4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;color:var(--t3);flex-shrink:0;
+  border:1px solid var(--rim2);
+  font-family:var(--fm);
+}
+.ord-ep{flex:1;background:none;border:none;outline:none;font-size:15px;font-weight:700;color:var(--t1);min-width:0;font-variant-numeric:tabular-nums}
+.ord-ep::placeholder{color:var(--t3);font-weight:400;font-size:13px}
+.ord-ep:focus{color:var(--gold)}
+.ord-sep{width:1px;height:24px;background:var(--rim2);flex-shrink:0}
+.ord-lp{background:none;border:none;outline:none;font-size:13px;font-weight:700;color:var(--t3);width:56px;text-align:right;font-variant-numeric:tabular-nums}
+.ord-lp::placeholder{color:var(--t3);font-weight:400;font-size:12px}
+.ord-lp:focus{color:var(--t2)}
+
+/* FIBO */
+.fibo-row{display:flex;gap:7px;overflow-x:auto;padding:2px 0;scrollbar-width:none}
+.fibo-row::-webkit-scrollbar{display:none}
+.fc{padding:10px 18px;border-radius:20px;font-size:14px;font-weight:800;background:var(--g);color:var(--t2);border:1.5px solid var(--rim);cursor:pointer;white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums;transition:all .2s var(--sp)}
+.fc.on{background:var(--gd);color:var(--gold);border-color:rgba(207,169,78,.5);transform:scale(1.05)}
+
+/* RR — premium glass */
+.rrbox{
+  background:linear-gradient(135deg,rgba(255,255,255,.022) 0%,rgba(255,255,255,.01) 100%);
+  border-radius:var(--r3);padding:18px;margin:13px 16px 0;
+  border:1px solid var(--rim);
+  backdrop-filter:blur(10px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.rrrow{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.rrk{font-size:13px;color:var(--t3)}
+.rrv{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.rrdiv{
+  height:1px;margin:12px 0;
+  background:linear-gradient(90deg,transparent 0%,var(--rim2) 30%,var(--rim2) 70%,transparent 100%);
+}
+.rrmain{display:flex;justify-content:space-between;align-items:center}
+.rrml{font-size:15px;font-weight:700}
+.rrmv{
+  font-size:36px;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums;
+  text-shadow:0 0 24px rgba(207,169,78,.3);letter-spacing:-1px;
+}
+.rrverd{
+  text-align:center;margin-top:13px;padding:10px;border-radius:var(--r1);
+  font-size:13px;font-weight:700;transition:all .3s;
+  border:1px solid transparent;
+}
+
+/* EMOTION */
+.emorow{display:flex;gap:6px;flex-wrap:wrap}
+.ec{padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;background:var(--g);color:var(--t2);border:1.5px solid var(--rim);cursor:pointer;transition:all .18s}
+.ec.on{background:var(--gd);color:var(--gold);border-color:rgba(207,169,78,.45)}
+
+/* NOTE */
+.nota{width:100%;padding:14px 16px;background:var(--g);border:1px solid var(--rim);border-radius:var(--r3);color:var(--t1);font-size:14px;line-height:1.55;resize:none;outline:none;min-height:84px;transition:border-color .2s}
+.nota:focus{border-color:rgba(207,169,78,.4)}
+.nota::placeholder{color:var(--t3)}
+
+/* SUBMIT */
+.sbtn{
+  width:100%;padding:17px;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);
+  border-radius:var(--r3);font-size:16px;font-weight:900;color:#000;
+  box-shadow:0 8px 28px rgba(207,169,78,.22);transition:all .2s var(--sp);letter-spacing:.2px;
+}
+.sbtn:active{transform:scale(.97);box-shadow:0 4px 14px rgba(207,169,78,.14)}
+.rbtn{width:100%;padding:14px;border-radius:var(--r3);border:1px solid var(--rim);color:var(--t3);font-size:14px;font-weight:700;margin-top:8px;transition:all .18s}
+.rbtn:active{background:var(--g)}
+
+/* ══ HISTORY ══ */
+.filtrow{display:flex;gap:7px;overflow-x:auto;padding:14px 16px 0;scrollbar-width:none}
+.filtrow::-webkit-scrollbar{display:none}
+.fchip{padding:7px 15px;border-radius:20px;font-size:13px;font-weight:700;background:var(--g);color:var(--t2);border:1.5px solid var(--rim);white-space:nowrap;flex-shrink:0;cursor:pointer;transition:all .18s}
+.fchip.on{background:var(--gd);color:var(--gold);border-color:rgba(207,169,78,.45)}
+.srchwrap{padding:10px 16px 0}
+.srchin{background:var(--g);border:1px solid var(--rim);border-radius:var(--r2);padding:0 14px;display:flex;align-items:center;gap:8px}
+.srchin input{flex:1;padding:12px 0;background:none;border:none;outline:none;font-size:14px;color:var(--t1)}
+.srchin input::placeholder{color:var(--t3)}
+.hlist{padding:4px 16px 0}
+.hdt{font-size:11px;font-weight:800;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;padding:13px 0 5px}
+.hcard{
+  background:var(--g);border-radius:var(--r2);border:1px solid var(--rim);
+  padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:11px;
+  position:relative;overflow:hidden;cursor:pointer;transition:all .18s;
+}
+.hcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3.5px}
+.hcard.win::before{background:var(--green)}.hcard.loss::before{background:var(--red)}.hcard.be::before{background:var(--t3)}
+.hcard:active{transform:scale(.98);background:var(--g2)}
+
+/* ══ ANALYTICS ══ */
+.kgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:16px 16px 0}
+.kcard{background:var(--g);border:1px solid var(--rim);border-radius:var(--r2);padding:13px 10px;text-align:center}
+.kval{font-size:20px;font-weight:900;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.klbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 13px}
+.cdh{text-align:center;font-size:10px;font-weight:700;color:var(--t3);padding:5px 0 6px}
+.cd{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--t3);position:relative;cursor:pointer}
+.cd.win{background:rgba(43,213,90,.14);color:var(--green)}.cd.loss{background:rgba(255,56,48,.14);color:var(--red)}.cd.be{background:rgba(255,255,255,.04);color:var(--t2)}
+.cd.today{border:1.5px solid var(--gold);color:var(--gold)}
+.cdot{position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%}
+.cd.win .cdot{background:var(--green)}.cd.loss .cdot{background:var(--red)}
+.bw{padding:4px 0 6px}.bwl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.bwt{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.bwf{height:100%;border-radius:3px;transition:width .6s var(--ez)}
+.srw{display:flex;align-items:center;gap:10px;padding:9px 0}
+.srw+.srw{border-top:1px solid var(--rim)}
+.srwn{font-size:13px;font-weight:600;min-width:70px}
+.srwb{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.srwf{height:100%;background:var(--gold);border-radius:3px;transition:width .5s var(--ez)}
+.srwc{font-size:12px;font-weight:700;color:var(--t3);min-width:20px;text-align:right}
+.pr{display:flex;align-items:center;padding:12px 0;gap:12px}
+.pr+.pr{border-top:1px solid var(--rim)}
+
+/* ══ SETTINGS ══ */
+.acccard{
+  margin:16px;padding:22px;
+  background:linear-gradient(140deg,#14141E 0%,#09090F 100%);
+  border-radius:var(--r4);border:1px solid rgba(207,169,78,.14);
+  position:relative;overflow:hidden;
+}
+.acccard::before{content:'';position:absolute;top:-70px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(207,169,78,.09) 0%,transparent 65%)}
+.actier{font-size:10px;font-weight:900;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:4px}
+.acname{font-size:20px;font-weight:900;letter-spacing:-.3px}
+.acbal{font-size:36px;font-weight:900;color:var(--gold);margin-top:4px;letter-spacing:-.8px;font-variant-numeric:tabular-nums}
+.acmeta{display:flex;gap:22px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rim)}
+.acml{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.acmv{font-size:14px;font-weight:800;margin-top:2px}
+.setcard{background:var(--g);border-radius:var(--r3);border:1px solid var(--rim);overflow:hidden;margin:0 16px}
+.si{display:flex;align-items:center;padding:14px 16px;gap:13px;cursor:pointer;transition:background .12s}
+.si+.si{border-top:1px solid var(--rim)}
+.si:active{background:var(--g2)}
+.siico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sibody{flex:1}
+.silbl{font-size:14px;font-weight:700}
+.sisub{font-size:12px;color:var(--t3);margin-top:1px}
+.sival{font-size:13px;color:var(--t3);font-weight:600}
+.sich{font-size:13px;color:var(--t3)}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .26s var(--ez);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.ov.on{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:430px;margin:0 auto;background:var(--bg2);border-top-left-radius:var(--r4);border-top-right-radius:var(--r4);border-top:1px solid var(--rim2);padding:18px 16px calc(18px + var(--sb));transform:translateY(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);max-height:92dvh;overflow-y:auto}
+.ov.on .sheet{transform:translateY(0)}
+.shand{width:36px;height:4px;background:var(--rim2);border-radius:2px;margin:0 auto 16px}
+.sttl{font-size:20px;font-weight:900;letter-spacing:-.3px;margin-bottom:16px}
+
+/* TOAST */
+.toast{position:fixed;top:calc(var(--st)+56px);left:50%;transform:translateX(-50%) translateY(-14px);background:var(--g2);border:1px solid var(--rim2);border-radius:24px;padding:10px 20px;font-size:14px;font-weight:700;z-index:400;opacity:0;pointer-events:none;transition:all .28s var(--sp);white-space:nowrap;display:flex;align-items:center;gap:8px;box-shadow:0 12px 40px rgba(0,0,0,.55)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* EMPTY */
+.mt{text-align:center;padding:38px 20px;color:var(--t3)}
+.mtico{font-size:44px;margin-bottom:12px}
+.mtttl{font-size:17px;font-weight:700;color:var(--t2);margin-bottom:6px}
+.mtsub{font-size:14px;line-height:1.5}
+
+/* UTIL */
+.cg2{color:var(--green)}.cr{color:var(--red)}.cau{color:var(--gold)}.cb{color:var(--blue)}.cam{color:var(--amber)}
+
+/* ── AI ANALYSIS ──────────────────────────── */
+.aiscope{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;background:var(--glass);color:var(--t3);border:1.5px solid var(--rim);cursor:pointer;transition:all .18s;white-space:nowrap}
+.aiscope.on{background:rgba(207,169,78,.13);color:var(--gold);border-color:rgba(207,169,78,.45)}
+.aibtn{width:100%;padding:16px;border-radius:var(--r2);background:linear-gradient(135deg,var(--gold) 0%,#F0CE82 100%);color:#000;font-size:15px;font-weight:900;box-shadow:0 6px 24px rgba(207,169,78,.22);transition:all .2s var(--sp);display:flex;align-items:center;justify-content:center;gap:8px}
+.aibtn:active{transform:scale(.97)}.aibtn:disabled{opacity:.5;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-spin{width:36px;height:36px;border-radius:50%;border:3px solid var(--rim2);border-top-color:var(--gold);animation:spin .8s linear infinite}
+.ai-block{font-size:14px;line-height:1.7;color:var(--t2)}
+.ai-section{background:rgba(255,255,255,.025);border-radius:var(--r2);padding:14px 16px;margin-bottom:10px;border:1px solid var(--rim)}
+.ai-section-ttl{font-size:13px;font-weight:900;color:var(--t1);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.ai-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--rim)}
+.ai-stat:last-child{border-bottom:none}
+.ai-stat-k{font-size:12px;color:var(--t3);font-weight:600}
+.ai-stat-v{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.ai-pill-g{display:inline-block;background:rgba(43,213,90,.12);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+.ai-pill-w{display:inline-block;background:rgba(255,149,0,.12);color:var(--amber);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+.ai-pill-r{display:inline-block;background:rgba(255,56,48,.12);color:var(--red);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+.ai-advice{font-size:13.5px;line-height:1.65;color:var(--t2);margin-bottom:6px;padding-left:14px;position:relative}
+.ai-advice::before{content:'›';position:absolute;left:0;color:var(--gold);font-weight:800}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="safetop"></div>
+<header class="nav">
+  <div class="nbrand">
+    <div class="nlogo">⚡</div>
+    <div><div class="ntitle">SNIPER AOF</div><div class="nsub">XAU/USD Journal</div></div>
+  </div>
+  <div class="nacts">
+    <button class="nbtn" onclick="openAdd()">＋</button>
+    <button class="nbtn" onclick="xport()">↗</button>
+  </div>
+</header>
+
+<div class="pages">
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="pg-dash" class="pg on">
+  <div class="hero">
+    <div class="hlbl">SNIPER AOF · XAU/USD</div>
+    <div style="display:flex;align-items:flex-end;gap:10px;margin-top:2px">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--t3);letter-spacing:.5px;margin-bottom:4px;text-transform:uppercase">Net Equity</div>
+        <div class="hprice" id="hero-equity" style="font-size:40px">$10,000</div>
+      </div>
+      <div style="margin-bottom:6px">
+        <span class="hbadge up" id="hero-change" style="font-size:11px">+$0 (0.0%)</span>
+      </div>
+    </div>
+    <div class="hrow" style="margin-top:12px">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:11px;color:var(--t3);font-weight:600">วันนี้</div>
+        <div style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums" id="hero-today-pnl">$0</div>
+      </div>
+      <div style="width:1px;height:32px;background:var(--rim2)"></div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:11px;color:var(--t3);font-weight:600">Win Rate (ทั้งหมด)</div>
+        <div style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums" id="hero-wr">0%</div>
+      </div>
+      <div style="width:1px;height:32px;background:var(--rim2)"></div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:11px;color:var(--t3);font-weight:600">เทรดทั้งหมด</div>
+        <div style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums" id="hero-count">0</div>
+      </div>
+    </div>
+  </div>
+  <div class="sesrow">
+    <div class="seschip" id="s0"><div class="sest">06:00–08:45</div><div class="sesn">London</div></div>
+    <div class="seschip" id="s1"><div class="sest">11:45–13:45</div><div class="sesn">NY Overlap</div></div>
+    <div class="seschip" id="s2"><div class="sest">19:30–22:00</div><div class="sesn">NY Prime</div></div>
+  </div>
+  <div class="sec">
+    <div class="sechd"><span class="secttl" id="pdlbl">สัปดาห์นี้</span><span class="secact" onclick="cyclePd()">เดือนนี้ ›</span></div>
+    <div class="sgrid">
+      <div class="scard sg"><div class="slbl">กำไรสุทธิ</div><div class="sval sg" id="dv-p">$0</div><div class="ssub" id="dv-ps">0 เทรด</div></div>
+      <div class="scard sau"><div class="slbl">Win Rate</div><div class="sval sau" id="dv-w">0%</div><div class="ssub" id="dv-ws">W:0 / L:0</div></div>
+      <div class="scard sb"><div class="slbl">Avg R:R</div><div class="sval sb" id="dv-r">0.0</div><div class="ssub">เป้า ≥ 2.0</div></div>
+      <div class="scard sr"><div class="slbl">Max DD</div><div class="sval sr" id="dv-d">$0</div><div class="ssub" id="dv-ds">0%</div></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="eqwrap">
+      <div class="eqhd">
+        <div><div class="eqlbl">Equity Curve</div><div class="eqval" id="eq-v">$10,000</div></div>
+        <div><div class="eqsub" id="eq-s">เริ่มต้น $10,000</div><div class="eqsub" id="eq-c" style="color:var(--t2)">+$0 (+0.0%)</div></div>
+      </div>
+      <canvas id="eqc"></canvas>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sechd"><span class="secttl">เทรดล่าสุด</span><span class="secact" onclick="go('hist')">ดูทั้งหมด ›</span></div>
+    <div class="card" style="padding:0 16px" id="rec-list">
+      <div class="mt"><div class="mtico">📊</div><div class="mtttl">ยังไม่มีการเทรด</div><div class="mtsub">กด + เพื่อบันทึกเทรดแรก</div></div>
+    </div>
+  </div>
+  <div class="sp"></div>
+</div>
+
+<!-- ═══ PRE-FLIGHT ═══ -->
+<div id="pg-trade" class="pg">
+  <div class="pfhd"><div class="pfttl">Pre-flight ✈️</div><div class="pfsub">ตรวจสอบก่อนเปิดออเดอร์ทุกครั้ง</div></div>
+
+  <!-- PLAN: 3 setups matching sketch -->
+  <div class="plan-wrap">
+    <div class="plan-lbl">Plan · เลือก Setup</div>
+    <div class="plan-grid">
+      <div class="pcard" id="pc-c" data-t="CHoCH" onclick="pickSetup('CHoCH')">
+        <div class="pcard-ico" style="background:rgba(18,131,255,.14);color:var(--blue)">〜</div>
+        <div class="pcard-name">CHoCH</div>
+        <div class="pcard-desc">Change of Character</div>
+        <div class="pcard-dot"></div>
+      </div>
+      <div class="pcard" id="pc-e" data-t="EMAX" onclick="pickSetup('EMAX')">
+        <div class="pcard-ico" style="background:rgba(43,213,90,.13);color:var(--green)">✕</div>
+        <div class="pcard-name">EMAX</div>
+        <div class="pcard-desc">EMA Cross<br>&amp; Demand/Supply</div>
+        <div class="pcard-dot"></div>
+      </div>
+      <div class="pcard" id="pc-w" data-t="W" onclick="pickSetup('W')">
+        <div class="pcard-ico" style="background:rgba(207,169,78,.13);color:var(--gold)">PA</div>
+        <div class="pcard-name">Price Action</div>
+        <div class="pcard-desc">Double W · Pattern<br>Confirm</div>
+        <div class="pcard-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAN / FOMO toggle — matching sketch -->
+  <div class="planfomo">
+    <div class="pf-btn plan-on" id="pfbtn-plan" onclick="setPF('plan')">📋 Plan</div>
+    <div class="pf-btn" id="pfbtn-fomo" onclick="setPF('fomo')">⚠️ FOMO</div>
+  </div>
+
+  <!-- WARN -->
+  <div class="warn">
+    <div class="wico">🚫</div>
+    <div><div class="wttl">ข้อห้ามหลัก</div><div class="wbody">ห้ามเทรดเมื่อ RSI Flip เรียงตัวเป็นแถว</div><div class="wsub">RSI bars เรียงเดียวกันหลายแท่งติดกัน = สัญญาณหลอก</div></div>
+  </div>
+
+  <!-- CONFIRMING CHECKLIST — matching sketch items -->
+  <div class="confirm-wrap">
+    <div class="confirm-lbl">Confirming Checklist</div>
+    <!-- phase mini legend -->
+    <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--prd);color:var(--purple)">① H1/M5 Trend</span>
+      <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--bd);color:var(--blue)">② CHoCH + FVG</span>
+      <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--gnd);color:var(--green)">③ RSI + EMA</span>
+      <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--gd);color:var(--gold)">④ PA Confirm</span>
+    </div>
+    <div class="cl-card">
+      <div class="ci" data-k="c1" onclick="ck(this)"><div class="cbox"></div><span class="clbl">H1 Trend · EMA same trend</span><span class="ctag ct-h1">H1</span></div>
+      <div class="ci" data-k="c2" onclick="ck(this)"><div class="cbox"></div><span class="clbl">M5 Trend · EMA same trend</span><span class="ctag ct-m5">M5</span></div>
+      <div class="ci" data-k="c3" onclick="ck(this)"><div class="cbox"></div><span class="clbl">CHoCH M5 เกิดขึ้นแล้ว</span><span class="ctag ct-choch">CHoCH</span></div>
+      <div class="ci" data-k="c4" onclick="ck(this)"><div class="cbox"></div><span class="clbl">FVG / OB ระบุตำแหน่งแล้ว</span><span class="ctag ct-fvg">FVG/OB</span></div>
+      <div class="ci" data-k="c5" onclick="ck(this)"><div class="cbox"></div><span class="clbl">RSI Entry under or over 50</span><span class="ctag ct-rsi">RSI</span></div>
+      <div class="ci" data-k="c6" onclick="ck(this)"><div class="cbox"></div><span class="clbl">EMA Cross ยืนยันทิศทาง</span><span class="ctag ct-ema">EMA</span></div>
+      <div class="ci" data-k="c7" onclick="ck(this)"><div class="cbox"></div><span class="clbl">Price Action Confirm</span><span class="ctag ct-pa">PA</span></div>
+    </div>
+  </div>
+
+  <!-- RING PROGRESS -->
+  <div class="ring-bar">
+    <div class="rsvgw">
+      <svg class="rsvg" width="48" height="48" viewBox="0 0 48 48">
+        <circle class="rbg" cx="24" cy="24" r="20"/>
+        <circle class="rfg" id="rfg" cx="24" cy="24" r="20"/>
+      </svg>
+      <div class="rpct" id="rpct">0%</div>
+    </div>
+    <div class="rinfo">
+      <div class="rlbl" id="rlbl">เริ่ม Checklist</div>
+      <div class="rsub" id="rsub">ต้องผ่านอย่างน้อย 5/7</div>
+    </div>
+    <div class="rbadge rb-no" id="rbadge">❌ ยังไม่พร้อม</div>
+  </div>
+
+  <!-- DIRECTION -->
+  <div class="fg">
+    <div class="fglbl">ทิศทาง</div>
+    <div class="dirtgl">
+      <div class="dirbtn on buy" id="db" onclick="setDir('BUY')">📈 BUY</div>
+      <div class="dirbtn sell" id="ds" onclick="setDir('SELL')">📉 SELL</div>
+    </div>
+  </div>
+
+  <!-- ORDER ENTRY PRICE 1,2,3 — from sketch -->
+  <div class="fg">
+    <div class="fglbl">Order Entry Price · ราคาเข้า (สูงสุด 3 ออเดอร์)</div>
+    <div class="ord-block">
+      <div class="ord-hd">
+        <span class="ord-hdttl">Entry Orders</span>
+        <div class="avg-box">
+          <span class="avg-lbl">ราคาเฉลี่ย</span>
+          <span class="avg-val" id="ord-avg">—</span>
+        </div>
+      </div>
+      <div class="ord-row">
+        <div class="ord-num">1</div>
+        <input class="ord-ep" type="number" placeholder="Entry Price #1" step="0.01" inputmode="decimal" data-o="0" oninput="calcAll()">
+        <div class="ord-sep"></div>
+        <input class="ord-lp" type="number" placeholder="Lot" step="0.01" inputmode="decimal" data-l="0" oninput="calcAll()">
+      </div>
+      <div class="ord-row">
+        <div class="ord-num" style="opacity:.4">2</div>
+        <input class="ord-ep" type="number" placeholder="Entry Price #2 (ถ้ามี)" step="0.01" inputmode="decimal" data-o="1" oninput="calcAll()">
+        <div class="ord-sep"></div>
+        <input class="ord-lp" type="number" placeholder="Lot" step="0.01" inputmode="decimal" data-l="1" oninput="calcAll()">
+      </div>
+      <div class="ord-row">
+        <div class="ord-num" style="opacity:.4">3</div>
+        <input class="ord-ep" type="number" placeholder="Entry Price #3 (ถ้ามี)" step="0.01" inputmode="decimal" data-o="2" oninput="calcAll()">
+        <div class="ord-sep"></div>
+        <input class="ord-lp" type="number" placeholder="Lot" step="0.01" inputmode="decimal" data-l="2" oninput="calcAll()">
+      </div>
+    </div>
+  </div>
+
+  <!-- SL / TP -->
+  <div class="fg">
+    <div class="fglbl">SL / TP / Account</div>
+    <div class="icard">
+      <div class="irow"><span class="ilbl">Stop Loss</span><input type="number" id="f-sl" placeholder="2330.00" step="0.01" oninput="calcAll()" inputmode="decimal"></div>
+      <div class="irow"><span class="ilbl">Take Profit</span><input type="number" id="f-tp" placeholder="2355.00" step="0.01" oninput="calcAll()" inputmode="decimal"></div>
+      <div class="irow"><span class="ilbl">Account $</span><input type="number" id="f-acc" placeholder="10000" step="100" oninput="calcAll()" inputmode="decimal"></div>
+      <div class="irow"><span class="ilbl">Session</span>
+        <select id="f-sess">
+          <option value="London">London Open (06:00)</option>
+          <option value="NY Overlap">NY Overlap (11:45)</option>
+          <option value="NY Prime">NY Prime (19:30)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIBO -->
+  <div class="fg">
+    <div class="fglbl">Fibo Entry Level</div>
+    <div class="fibo-row">
+      <div class="fc" data-f="100" onclick="pFibo(this)">100%</div>
+      <div class="fc" data-f="78.6" onclick="pFibo(this)">78.6%</div>
+      <div class="fc" data-f="61.8" onclick="pFibo(this)">61.8%</div>
+      <div class="fc" data-f="50" onclick="pFibo(this)">50%</div>
+      <div class="fc" data-f="38.2" onclick="pFibo(this)">38.2%</div>
+      <div class="fc" data-f="none" onclick="pFibo(this)" style="color:var(--t3)">ไม่ระบุ</div>
+    </div>
+  </div>
+
+  <!-- RR -->
+  <div class="rrbox">
+    <div class="rrrow"><span class="rrk">Total Lot</span><span class="rrv" id="rr-lot">—</span></div>
+    <div class="rrrow"><span class="rrk">ราคาเฉลี่ย (Avg Entry)</span><span class="rrv" id="rr-ae">—</span></div>
+    <div class="rrrow"><span class="rrk">Risk (SL pips)</span><span class="rrv" id="rr-sl">—</span></div>
+    <div class="rrrow"><span class="rrk">Reward (TP pips)</span><span class="rrv" id="rr-tp">—</span></div>
+    <div class="rrrow"><span class="rrk">Risk $</span><span class="rrv" id="rr-ru">—</span></div>
+    <div class="rrrow"><span class="rrk">Profit $</span><span class="rrv" id="rr-pu">—</span></div>
+    <div class="rrrow"><span class="rrk">Risk %</span><span class="rrv" id="rr-rp">—</span></div>
+    <div class="rrdiv"></div>
+    <div class="rrmain"><span class="rrml">R:R Ratio</span><span class="rrmv" id="rr-ratio">—</span></div>
+    <div class="rrverd" id="rr-verd" style="background:var(--bg3);color:var(--t3)">กรอกราคาเพื่อคำนวณ R:R</div>
+  </div>
+
+  <!-- EMOTION -->
+  <div class="fg"><div class="fglbl">สภาวะจิตใจ</div>
+    <div class="emorow">
+      <div class="ec" onclick="tEmo(this)">😌 ปกติ</div>
+      <div class="ec" onclick="tEmo(this)">🎯 โฟกัส</div>
+      <div class="ec" onclick="tEmo(this)">😤 FOMO</div>
+      <div class="ec" onclick="tEmo(this)">😰 กลัว</div>
+      <div class="ec" onclick="tEmo(this)">🔥 มั่นใจ</div>
+      <div class="ec" onclick="tEmo(this)">😓 เหนื่อย</div>
+      <div class="ec" onclick="tEmo(this)">🤯 สับสน</div>
+      <div class="ec" onclick="tEmo(this)">💪 ตั้งใจ</div>
+    </div>
+  </div>
+
+  <!-- NOTE -->
+  <div class="fg"><div class="fglbl">บันทึก / เหตุผล</div>
+    <textarea class="nota" id="f-notes" placeholder="อธิบาย setup และเหตุผลที่เข้าเทรด..."></textarea>
+  </div>
+
+  <!-- RESULT -->
+  <div class="fg"><div class="fglbl">ผลลัพธ์ (ถ้ารู้แล้ว)</div>
+    <div class="icard">
+      <div class="irow"><span class="ilbl">PnL ($)</span><input type="number" id="f-pnl" placeholder="0 = ยังเปิดอยู่" step="0.01" inputmode="decimal"></div>
+      <div class="irow"><span class="ilbl">ผลลัพธ์</span>
+        <select id="f-res">
+          <option value="">ยังเปิดอยู่</option>
+          <option value="WIN">✅ กำไร (Win)</option>
+          <option value="LOSS">❌ ขาดทุน (Loss)</option>
+          <option value="BE">➡️ Break Even</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="fg" style="margin-bottom:0">
+    <button class="sbtn" onclick="saveTrade()">บันทึกการเทรด</button>
+    <button class="rbtn" onclick="resetForm()">ล้างฟอร์ม</button>
+  </div>
+  <div class="sp"></div>
+</div>
+
+<!-- ═══ HISTORY ═══ -->
+<div id="pg-hist" class="pg">
+  <div class="sec" style="padding-bottom:0"><div class="sechd"><span class="secttl">ประวัติเทรด</span><span class="secact" id="hcount">0 รายการ</span></div></div>
+  <div class="filtrow">
+    <div class="fchip on" onclick="sf('all',this)">ทั้งหมด</div>
+    <div class="fchip" onclick="sf('win',this)">✅ กำไร</div>
+    <div class="fchip" onclick="sf('loss',this)">❌ ขาดทุน</div>
+    <div class="fchip" onclick="sf('be',this)">➡️ BE</div>
+    <div class="fchip" onclick="sf('buy',this)">📈 BUY</div>
+    <div class="fchip" onclick="sf('sell',this)">📉 SELL</div>
+    <div class="fchip" onclick="sf('fomo',this)">⚠️ FOMO</div>
+    <div class="fchip" onclick="sf('plan',this)">📋 Plan</div>
+  </div>
+  <div class="srchwrap"><div class="srchin"><span style="color:var(--t3);font-size:15px">🔍</span><input type="text" placeholder="ค้นหา setup, session, note..." oninput="sh(this.value)"></div></div>
+  <div class="hlist" id="hlist"><div class="mt"><div class="mtico">📋</div><div class="mtttl">ยังไม่มีประวัติ</div><div class="mtsub">บันทึกเทรดแรกเพื่อดูที่นี่</div></div></div>
+  <div class="sp"></div>
+</div>
+
+<!-- ═══ ANALYTICS ═══ -->
+<div id="pg-an" class="pg">
+  <div class="kgrid">
+    <div class="kcard"><div class="kval cau" id="k0">0</div><div class="klbl">Trades</div></div>
+    <div class="kcard"><div class="kval cg2" id="k1">0%</div><div class="klbl">Win Rate</div></div>
+    <div class="kcard"><div class="kval cb" id="k2">0.0</div><div class="klbl">Avg R:R</div></div>
+    <div class="kcard"><div class="kval cg2" id="k3">0.0</div><div class="klbl">Profit Factor</div></div>
+    <div class="kcard"><div class="kval cam" id="k4">0</div><div class="klbl">Best Streak</div></div>
+    <div class="kcard"><div class="kval cr" id="k5">0%</div><div class="klbl">Max DD</div></div>
+  </div>
+  <div class="sec"><div class="sechd"><span class="secttl">ปฏิทินเทรด</span><span class="secact" id="calttl" onclick="rCal()">ก.ค. 2568</span></div>
+    <div class="card" style="padding:12px 10px"><div class="cg" id="cal-h"></div><div class="cg" id="cal-b"></div></div>
+  </div>
+  <div class="sec"><div class="sechd"><span class="secttl">Grade Breakdown</span></div><div class="card" style="padding:16px" id="gr-bk"><div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div></div>
+  <div class="sec"><div class="sechd"><span class="secttl">📐 Fibo Win Rate</span></div><div class="card" style="padding:16px" id="fibo-st"><div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div></div>
+  <div class="sec"><div class="sechd"><span class="secttl">⚡ Setup Performance</span></div><div class="card" style="padding:16px" id="set-st"><div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div></div>
+  <div class="sec"><div class="sechd"><span class="secttl">Session Performance</span></div><div class="card" style="padding:0 16px" id="sess-st"><div class="mt" style="padding:24px 0"><div style="color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div></div></div>
+  <div class="sec"><div class="sechd"><span class="secttl">Best Trades 🏆</span></div><div class="card" style="padding:0 16px" id="best-st"><div class="mt" style="padding:24px 0"><div style="color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div></div></div>
+  <div class="sec"><div class="sechd"><span class="secttl">Worst Trades 💀</span></div><div class="card" style="padding:0 16px" id="worst-st"><div class="mt" style="padding:24px 0"><div style="color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div></div></div>
+  <div class="sec"><div class="sechd"><span class="secttl">สภาวะจิตใจ</span></div><div class="card" style="padding:16px 16px 8px" id="emo-st"><div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div></div>
+  <div class="sec"><div class="sechd"><span class="secttl">FOMO vs Plan Analysis</span></div><div class="card" style="padding:16px" id="fomo-st"><div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div></div>
+
+  <!-- AI ANALYSIS SECTION -->
+  <div class="sec">
+    <div class="sechd"><span class="secttl">🤖 วิเคราะห์ด้วย AI</span></div>
+    <div style="background:linear-gradient(135deg,rgba(207,169,78,.1) 0%,rgba(18,131,255,.06) 100%);border-radius:var(--r3);border:1px solid rgba(207,169,78,.2);padding:20px 18px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(207,169,78,.08) 0%,transparent 70%);pointer-events:none"></div>
+      <div style="font-size:15px;font-weight:800;color:var(--t1);margin-bottom:6px">วิเคราะห์พฤติกรรมการเทรด</div>
+      <div style="font-size:13px;color:var(--t3);line-height:1.55;margin-bottom:16px">AI จะสรุปสถิติทั้งหมดของคุณและวิเคราะห์จุดแข็ง จุดอ่อน พฤติกรรม FOMO รูปแบบ Setup ที่ทำกำไรสูงสุด และให้คำแนะนำเฉพาะตัว</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px" id="ai-scope-row">
+        <div class="aiscope on" data-s="all" onclick="setAiScope(this)">ทั้งหมด</div>
+        <div class="aiscope" data-s="week" onclick="setAiScope(this)">7 วัน</div>
+        <div class="aiscope" data-s="month" onclick="setAiScope(this)">30 วัน</div>
+        <div class="aiscope" data-s="fomo" onclick="setAiScope(this)">FOMO เท่านั้น</div>
+        <div class="aiscope" data-s="loss" onclick="setAiScope(this)">ที่ขาดทุน</div>
+      </div>
+      <button class="aibtn" onclick="runAI()" id="ai-run-btn">
+        <span id="ai-btn-txt">✨ เริ่มวิเคราะห์</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="sp"></div>
+</div>
+
+<!-- AI RESULT MODAL -->
+<div class="ov" id="ai-ov" onclick="cov(event,'ai-ov')">
+  <div class="sheet" style="max-height:88dvh">
+    <div class="shand"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--blue));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🤖</div>
+      <div>
+        <div class="sttl" style="margin:0;font-size:19px">AI วิเคราะห์การเทรด</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:1px" id="ai-scope-label">ข้อมูลทั้งหมด</div>
+      </div>
+    </div>
+    <div id="ai-result-body">
+      <div style="display:flex;flex-direction:column;align-items:center;padding:40px 0;gap:14px">
+        <div class="ai-spinner"></div>
+        <div style="font-size:14px;color:var(--t3)">กำลังวิเคราะห์...</div>
+      </div>
+    </div>
+    <button onclick="document.getElementById('ai-ov').classList.remove('on')"
+      style="width:100%;margin-top:16px;padding:14px;border-radius:var(--r2);background:var(--glass2);color:var(--t1);font-size:14px;font-weight:700;border:1px solid var(--rim)">
+      ปิด
+    </button>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS ═══ -->
+<div id="pg-set" class="pg">
+  <div class="acccard">
+    <div class="actier">⚡ Sniper Pro</div>
+    <div class="acname" id="acc-n">อ๊อฟ</div>
+    <div class="acbal" id="acc-b">$10,000.00</div>
+    <div class="acmeta">
+      <div><div class="acml">เริ่มเทรด</div><div class="acmv" id="acc-s">—</div></div>
+      <div><div class="acml">Total</div><div class="acmv" id="acc-t">0 เทรด</div></div>
+      <div><div class="acml">Pair</div><div class="acmv">XAU/USD</div></div>
+    </div>
+  </div>
+  <div class="sec" style="padding-top:0"><div class="sechd" style="padding-top:18px"><span class="secttl">การตั้งค่า</span></div>
+    <div class="setcard">
+      <div class="si" onclick="es('name')"><div class="siico" style="background:var(--gd)">👤</div><div class="sibody"><div class="silbl">ชื่อเทรดเดอร์</div><div class="sisub">ชื่อที่แสดงในแอป</div></div><span class="sival" id="sv-n">อ๊อฟ</span><span class="sich">›</span></div>
+      <div class="si" onclick="es('capital')"><div class="siico" style="background:var(--gnd)">💰</div><div class="sibody"><div class="silbl">เงินทุนเริ่มต้น</div><div class="sisub">ใช้คำนวณ Risk % และ DD</div></div><span class="sival" id="sv-c">$10,000</span><span class="sich">›</span></div>
+      <div class="si" onclick="es('risk')"><div class="siico" style="background:var(--rd)">⚠️</div><div class="sibody"><div class="silbl">Risk ต่อเทรด (%)</div><div class="sisub">ขีดจำกัดความเสี่ยง</div></div><span class="sival" id="sv-r">1%</span><span class="sich">›</span></div>
+      <div class="si" onclick="es('minrr')"><div class="siico" style="background:var(--bd)">📐</div><div class="sibody"><div class="silbl">Min R:R</div><div class="sisub">R:R ขั้นต่ำที่ยอมรับได้</div></div><span class="sival" id="sv-m">2.0R</span><span class="sich">›</span></div>
+      <div class="si" onclick="es('dailyloss')"><div class="siico" style="background:rgba(255,56,48,.1)">🛑</div><div class="sibody"><div class="silbl">Daily Loss Limit</div><div class="sisub">หยุดเทรดเมื่อขาดทุนถึงนี้</div></div><span class="sival" id="sv-d">2%</span><span class="sich">›</span></div>
+    </div>
+  </div>
+  <div class="sec" style="padding-top:14px"><div class="sechd"><span class="secttl">ข้อมูล</span></div>
+    <div class="setcard">
+      <div class="si" onclick="xport()"><div class="siico" style="background:var(--bd)">📤</div><div class="sibody"><div class="silbl">Export JSON</div><div class="sisub">บันทึกข้อมูลทั้งหมด</div></div><span class="sich">›</span></div>
+      <div class="si" onclick="trigImp()"><div class="siico" style="background:var(--gnd)">📥</div><div class="sibody"><div class="silbl">Import JSON</div><div class="sisub">โหลดข้อมูลจากไฟล์</div></div><span class="sich">›</span></div>
+      <div class="si" onclick="clrAll()"><div class="siico" style="background:var(--rd)">🗑️</div><div class="sibody"><div class="silbl">ลบข้อมูลทั้งหมด</div><div class="sisub" style="color:var(--red)">ไม่สามารถกู้คืนได้</div></div><span class="sich">›</span></div>
+    </div>
+  </div>
+  <div class="sp"></div>
+</div>
+
+</div><!-- /pages -->
+
+<nav class="tabbar">
+  <div class="ti on" id="t-dash" onclick="go('dash')"><div class="tiico">📊</div><div class="tilbl">Dashboard</div><div class="tibar"></div></div>
+  <div class="ti" id="t-trade" onclick="go('trade')"><div class="tiico">✈️</div><div class="tilbl">Pre-flight</div><div class="tibar"></div></div>
+  <div class="ti" id="t-hist" onclick="go('hist')"><div class="tiico">📋</div><div class="tilbl">History</div><div class="tibar"></div></div>
+  <div class="ti" id="t-an" onclick="go('an')"><div class="tiico">📈</div><div class="tilbl">Analytics</div><div class="tibar"></div></div>
+  <div class="ti" id="t-set" onclick="go('set')"><div class="tiico">⚙️</div><div class="tilbl">Settings</div><div class="tibar"></div></div>
+</nav>
+</div><!-- /shell -->
+
+<!-- MODALS -->
+<div class="ov" id="td-ov" onclick="cov(event,'td-ov')"><div class="sheet"><div class="shand"></div><div class="sttl" id="td-ttl">รายละเอียด</div><div id="td-body"></div></div></div>
+<div class="ov" id="set-ov" onclick="cov(event,'set-ov')">
+  <div class="sheet">
+    <div class="shand"></div><div class="sttl" id="set-ttl">แก้ไข</div><div id="set-body"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="document.getElementById('set-ov').classList.remove('on')" style="flex:1;padding:14px;border-radius:var(--r2);border:1px solid var(--rim);color:var(--t2);font-size:14px;font-weight:700">ยกเลิก</button>
+      <button onclick="svSet()" style="flex:1;padding:14px;border-radius:var(--r2);background:var(--gold);color:#000;font-size:14px;font-weight:900">บันทึก</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="imp-f" accept=".json" style="display:none" onchange="hImp(event)">
+<script>
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+const S={
+  trades:[],
+  cfg:{name:'อ๊อฟ',capital:10000,risk:1,minrr:2.0,dailyloss:2},
+  form:{dir:'BUY',emos:[],planFomo:'plan',setup:'',grade:0,fibo:''},
+  cl:{},flt:'all',srch:'',pd:'week',
+  calY:new Date().getFullYear(),calM:new Date().getMonth(),
+  setKey:null,
+};
+const TCL=7,MCL=5;
+
+/* ═══════════════════════════════════════════
+   STORAGE
+═══════════════════════════════════════════ */
+function sv(){try{localStorage.setItem('sav4',JSON.stringify({t:S.trades,c:S.cfg}))}catch(e){}}
+function ld(){try{const d=JSON.parse(localStorage.getItem('sav4')||'{}');if(d.t)S.trades=d.t;if(d.c)S.cfg={...S.cfg,...d.c}}catch(e){}}
+
+/* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+function go(t){
+  document.querySelectorAll('.ti').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.pg').forEach(e=>e.classList.remove('on'));
+  document.getElementById('t-'+t).classList.add('on');
+  document.getElementById('pg-'+t).classList.add('on');
+  document.querySelector('.pages').scrollTo({top:0,behavior:'smooth'});
+  if(t==='dash')rDash();
+  if(t==='hist')rHist();
+  if(t==='an')rAn();
+  if(t==='set')rSet();
+}
+function openAdd(){go('trade')}
+
+/* ═══════════════════════════════════════════
+   SESSION CHECK (UTC+7)
+═══════════════════════════════════════════ */
+function chkSess(){
+  const n=new Date(),t=n.getHours()*60+n.getMinutes();
+  const sp=[{s:6*60,e:8*60+45},{s:11*60+45,e:13*60+45},{s:19*60+30,e:22*60}];
+  const nm=['London','NY Overlap','NY Prime'];
+  sp.forEach((x,i)=>{
+    const el=document.getElementById('s'+i),live=t>=x.s&&t<=x.e;
+    el.classList.toggle('live',live);
+    el.querySelector('.sesn').innerHTML=live?`<span class="dot"></span>${nm[i]}`:nm[i];
+  });
+}
+
+/* ═══════════════════════════════════════════
+   CHECKLIST (7 items, min 5)
+═══════════════════════════════════════════ */
+function ck(el){
+  el.classList.toggle('ck');
+  S.cl[el.dataset.k]=el.classList.contains('ck');
+  if(navigator.vibrate)navigator.vibrate(7);
+  uRing();
+}
+function uRing(){
+  const n=Object.values(S.cl).filter(Boolean).length,pct=Math.round(n/TCL*100);
+  const c=2*Math.PI*20,fg=document.getElementById('rfg');
+  fg.style.strokeDashoffset=c-(pct/100)*c;
+  document.getElementById('rpct').textContent=pct+'%';
+  const b=document.getElementById('rbadge'),l=document.getElementById('rlbl'),s=document.getElementById('rsub');
+  if(n<MCL){
+    b.textContent='❌ ยังไม่พร้อม';b.className='rbadge rb-no';
+    l.textContent=`ผ่าน ${n}/${TCL}`;s.textContent=`ต้องผ่านอย่างน้อย ${MCL}/${TCL}`;
+    fg.classList.remove('full');
+  }else if(n<TCL){
+    b.textContent='⚡ พร้อมเทรด';b.className='rbadge rb-pt';
+    l.textContent=`ผ่าน ${n}/${TCL}`;s.textContent='ผ่านเกณฑ์ขั้นต่ำ';
+    fg.classList.remove('full');
+  }else{
+    b.textContent='✅ Full Setup!';b.className='rbadge rb-ok';
+    l.textContent='Full Checklist ✓';s.textContent='Setup สมบูรณ์ 100%';
+    fg.classList.add('full');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SETUP PICKER (3 cards)
+═══════════════════════════════════════════ */
+function pickSetup(t){
+  S.form.setup=t;
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('on'));
+  const idMap={CHoCH:'pc-c',EMAX:'pc-e',W:'pc-w'};
+  document.getElementById(idMap[t]).classList.add('on');
+  if(navigator.vibrate)navigator.vibrate(5);
+  
+}
+
+/* ═══════════════════════════════════════════
+   PLAN / FOMO TOGGLE
+═══════════════════════════════════════════ */
+function setPF(v){
+  S.form.planFomo=v;
+  document.getElementById('pfbtn-plan').className='pf-btn'+(v==='plan'?' plan-on':'');
+  document.getElementById('pfbtn-fomo').className='pf-btn'+(v==='fomo'?' fomo-on':'');
+}
+
+/* ═══════════════════════════════════════════
+   FIBO
+═══════════════════════════════════════════ */
+function pFibo(el){
+  document.querySelectorAll('.fc').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  S.form.fibo=el.dataset.f;
+  calcAll();
+}
+
+/* ═══════════════════════════════════════════
+   DIRECTION
+═══════════════════════════════════════════ */
+function setDir(d){
+  S.form.dir=d;
+  const db=document.getElementById('db'),ds=document.getElementById('ds');
+  if(db){db.className='dirbtn'+(d==='BUY'?' on buy':'');ds.className='dirbtn'+(d==='SELL'?' on sell':'')}
+  calcAll();
+}
+
+/* ═══════════════════════════════════════════
+   EMOTIONS
+═══════════════════════════════════════════ */
+function tEmo(el){
+  el.classList.toggle('on');
+  const t=el.textContent.trim();
+  const i=S.form.emos.indexOf(t);
+  if(i===-1)S.form.emos.push(t);else S.form.emos.splice(i,1);
+}
+
+/* ═══════════════════════════════════════════
+   MULTI-ORDER CALC
+═══════════════════════════════════════════ */
+function getOrders(){
+  const eps=document.querySelectorAll('.ord-ep'),lps=document.querySelectorAll('.ord-lp');
+  const orders=[];
+  eps.forEach((inp,i)=>{
+    const e=parseFloat(inp.value),lot=parseFloat(lps[i].value)||0;
+    if(e>0&&lot>0)orders.push({e,lot});
+  });
+  return orders;
+}
+
+function calcAll(){
+  const orders=getOrders();
+  const sl=parseFloat(document.getElementById('f-sl').value);
+  const tp=parseFloat(document.getElementById('f-tp').value);
+  const acc=parseFloat(document.getElementById('f-acc').value)||S.cfg.capital;
+  const aeEl=document.getElementById('rr-ae'),lotEl=document.getElementById('rr-lot');
+
+  if(orders.length===0){aeEl&&(aeEl.textContent='—');lotEl&&(lotEl.textContent='—');rrClr();return}
+
+  const totLot=orders.reduce((s,o)=>s+o.lot,0);
+  const wSum=orders.reduce((s,o)=>s+o.e*o.lot,0);
+  const avg=wSum/totLot;
+
+  // Update avg display in order block header and RR box
+  const avgEl=document.getElementById('ord-avg');
+  if(avgEl)avgEl.textContent=avg.toFixed(2);
+  if(aeEl)aeEl.textContent=avg.toFixed(2);
+  if(lotEl)lotEl.textContent=totLot.toFixed(2)+' lot';
+
+  if(!sl||!tp){rrClr();return}
+  const isBuy=S.form.dir==='BUY';
+  const slP=isBuy?(avg-sl)*10:(sl-avg)*10;
+  const tpP=isBuy?(tp-avg)*10:(avg-tp)*10;
+  if(slP<=0||tpP<=0){rrClr();return}
+
+  const tv=10,rU=totLot*slP*tv,pU=totLot*tpP*tv,rPct=rU/acc*100,rr=tpP/slP;
+  g('rr-sl').textContent=slP.toFixed(1)+' pips';
+  g('rr-tp').textContent=tpP.toFixed(1)+' pips';
+  g('rr-ru').textContent='$'+rU.toFixed(2);
+  g('rr-pu').textContent='$'+pU.toFixed(2);
+  g('rr-rp').textContent=rPct.toFixed(2)+'%';
+  g('rr-ratio').textContent='1 : '+rr.toFixed(2);
+  const v=g('rr-verd'),mr=S.cfg.minrr||2;
+  if(rr>=mr&&rPct<=S.cfg.risk){
+    v.style.background='var(--gnd)';v.style.color='var(--green)';
+    v.textContent=`✅ R:R ${rr.toFixed(2)} | Risk ${rPct.toFixed(2)}%`;
+  }else if(rr>=mr){
+    v.style.background='var(--amd)';v.style.color='var(--amber)';
+    v.textContent=`⚠️ R:R ดี แต่ Risk ${rPct.toFixed(2)}% เกิน ${S.cfg.risk}%`;
+  }else{
+    v.style.background='var(--rd)';v.style.color='var(--red)';
+    v.textContent=`❌ R:R ${rr.toFixed(2)} < ${mr} — ไม่ควรเทรด`;
+  }
+  
+}
+
+function rrClr(){
+  ['rr-sl','rr-tp','rr-ru','rr-pu','rr-rp','rr-ratio'].forEach(id=>{const el=g(id);if(el)el.textContent='—'});
+  const v=g('rr-verd');
+  if(v){v.style.background='var(--bg3)';v.style.color='var(--t3)';v.textContent='กรอกราคาเพื่อคำนวณ R:R'}
+}
+
+/* ═══════════════════════════════════════════
+   SAVE TRADE
+═══════════════════════════════════════════ */
+function saveTrade(){
+  const orders=getOrders();
+  const sl=parseFloat(document.getElementById('f-sl').value);
+  const tp=parseFloat(document.getElementById('f-tp').value);
+  const pnl=parseFloat(document.getElementById('f-pnl').value);
+  const res=document.getElementById('f-res').value;
+  const sess=document.getElementById('f-sess').value;
+  const notes=document.getElementById('f-notes').value.trim();
+  if(orders.length===0){showT('⚠️ กรุณากรอก Entry Price และ Lot อย่างน้อย 1 ออเดอร์');return}
+  if(!sl||!tp){showT('⚠️ กรุณากรอก SL และ TP');return}
+  const totLot=orders.reduce((s,o)=>s+o.lot,0);
+  const avg=orders.reduce((s,o)=>s+o.e*o.lot,0)/totLot;
+  const acc=parseFloat(document.getElementById('f-acc').value)||S.cfg.capital;
+  const isBuy=S.form.dir==='BUY';
+  const slP=isBuy?(avg-sl)*10:(sl-avg)*10,tpP=isBuy?(tp-avg)*10:(avg-tp)*10;
+  const rr=slP>0&&tpP>0?tpP/slP:0;
+  const rU=totLot*slP*10,pU=totLot*tpP*10,rPct=rU/acc*100;
+  const clScore=Object.values(S.cl).filter(Boolean).length;
+  S.trades.unshift({
+    id:Date.now().toString(),date:new Date().toISOString(),
+    pair:'XAU/USD',dir:S.form.dir,
+    entry:avg,orders:[...orders],sl,tp,lot:totLot,sess,
+    slP,tpP,rr,rU,pU,rPct,
+    pnl:isNaN(pnl)?0:pnl,result:res,
+    emos:[...S.form.emos],
+    planFomo:S.form.planFomo,
+    setup:S.form.setup,fibo:S.form.fibo,
+    notes,clScore,clMax:TCL,
+  });
+  sv();showT('✅ บันทึกแล้ว!');resetForm();rDash();
+}
+
+function resetForm(){
+  document.querySelectorAll('.ord-ep,.ord-lp').forEach(el=>el.value='');
+  ['f-sl','f-tp','f-acc','f-pnl','f-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  const fr=document.getElementById('f-res');if(fr)fr.value='';
+  S.form={dir:'BUY',emos:[],planFomo:'plan',setup:'',grade:0,fibo:''};
+  S.cl={};
+  // Reset direction
+  const dbr=document.getElementById('db'),dsr=document.getElementById('ds');
+  if(dbr){dbr.className='dirbtn on buy';dsr.className='dirbtn sell'}
+  // Reset setup cards
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('on'));
+  // Reset plan/fomo
+  setPF('plan');
+  // Reset grade
+  [1,2,3,4].forEach(i=>{const el=document.getElementById('gch'+i);if(el)el.classList.remove('on')});
+  // Reset fibo
+  document.querySelectorAll('.fc').forEach(c=>c.classList.remove('on'));
+  // Reset emotions
+  document.querySelectorAll('.ec').forEach(c=>c.classList.remove('on'));
+  // Reset checklist
+  document.querySelectorAll('.ci').forEach(el=>el.classList.remove('ck'));
+  // Reset avg
+  const avgEl=document.getElementById('ord-avg');if(avgEl)avgEl.textContent='—';
+  uRing();rrClr();
+  showT('🔄 ล้างฟอร์มแล้ว');
+}
+
+/* ═══════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════ */
+let pdIdx=0;
+const pdM=['week','month','all'],pdL=['สัปดาห์นี้','เดือนนี้','ทั้งหมด'],pdN=['เดือนนี้ ›','ทั้งหมด ›','สัปดาห์นี้ ›'];
+function cyclePd(){
+  pdIdx=(pdIdx+1)%3;S.pd=pdM[pdIdx];
+  g('pdlbl').textContent=pdL[pdIdx];
+  document.querySelector('#pg-dash .secact').textContent=pdN[pdIdx];
+  rDash();
+}
+function pdTr(){
+  const n=new Date();
+  if(S.pd==='week'){const w=new Date(n);w.setDate(n.getDate()-n.getDay());w.setHours(0,0,0,0);return S.trades.filter(t=>new Date(t.date)>=w)}
+  if(S.pd==='month'){return S.trades.filter(t=>{const d=new Date(t.date);return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear()})}
+  return S.trades;
+}
+function rDash(){
+  const ts=pdTr(),cl=ts.filter(t=>t.result),ws=cl.filter(t=>t.result==='WIN'),ls=cl.filter(t=>t.result==='LOSS');
+  const pnl=ts.reduce((s,t)=>s+(t.pnl||0),0);
+  const wr=cl.length?Math.round(ws.length/cl.length*100):0;
+  const rl=S.trades.filter(t=>t.rr>0);
+  const avR=rl.length?rl.reduce((s,t)=>s+t.rr,0)/rl.length:0;
+  let bal=S.cfg.capital,pk=S.cfg.capital,dd=0;
+  [...S.trades].reverse().forEach(t=>{bal+=(t.pnl||0);pk=Math.max(pk,bal);dd=Math.max(dd,pk-bal)});
+  g('dv-p').textContent=(pnl>=0?'+':'')+' $'+Math.abs(pnl).toFixed(0);
+  g('dv-p').className='sval '+(pnl>=0?'sg':'sr');
+  g('dv-ps').textContent=ts.length+' เทรด';
+  g('dv-w').textContent=wr+'%';
+  g('dv-ws').textContent=`W:${ws.length} / L:${ls.length}`;
+  g('dv-r').textContent=avR.toFixed(1);
+  g('dv-d').textContent='-$'+dd.toFixed(0);
+  g('dv-ds').textContent=(dd/Math.max(S.cfg.capital,1)*100).toFixed(1)+'%';
+  const cap=S.cfg.capital;let eq=cap;const pts=[cap];
+  [...S.trades].reverse().forEach(t=>{eq+=(t.pnl||0);pts.push(eq)});
+  const fEq=pts[pts.length-1],eCh=fEq-cap;
+  g('eq-v').textContent='$'+fEq.toFixed(2);
+  g('eq-s').textContent='เริ่มต้น $'+cap.toLocaleString();
+  const ecEl=g('eq-c');
+  ecEl.textContent=(eCh>=0?'+':'')+' $'+eCh.toFixed(2)+' ('+(eCh/Math.max(cap,1)*100).toFixed(1)+'%)';
+  ecEl.style.color=eCh>=0?'var(--green)':'var(--red)';
+  // Update hero section
+  const heq=g('hero-equity');if(heq)heq.textContent='$'+fEq.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const hch=g('hero-change');
+  if(hch){
+    hch.textContent=(eCh>=0?'+':'')+' $'+eCh.toFixed(2)+' ('+(eCh/Math.max(cap,1)*100).toFixed(1)+'%)';
+    hch.className='hbadge '+(eCh>=0?'up':'dn');
+  }
+  // Today P&L
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayPnl=S.trades.filter(t=>new Date(t.date)>=today).reduce((s,t)=>s+(t.pnl||0),0);
+  const htp=g('hero-today-pnl');
+  if(htp){htp.textContent=(todayPnl>=0?'+':'')+' $'+todayPnl.toFixed(2);htp.style.color=todayPnl>=0?'var(--green)':todayPnl<0?'var(--red)':'var(--t2)'}
+  // All-time WR + count
+  const allCl=S.trades.filter(t=>t.result),allWs=allCl.filter(t=>t.result==='WIN');
+  const allWR=allCl.length?Math.round(allWs.length/allCl.length*100):0;
+  const hwr=g('hero-wr');if(hwr){hwr.textContent=allWR+'%';hwr.style.color=allWR>=55?'var(--green)':allWR>=45?'var(--amber)':'var(--red)'}
+  const hcnt=g('hero-count');if(hcnt)hcnt.textContent=S.trades.length;
+  drawEq(pts);
+  const rl2=g('rec-list'),rec=S.trades.slice(0,5);
+  rl2.innerHTML=rec.length?rec.map(t=>trHTML(t)).join(''):'<div class="mt"><div class="mtico">📊</div><div class="mtttl">ยังไม่มีการเทรด</div><div class="mtsub">กด + เพื่อบันทึกเทรดแรก</div></div>';
+}
+
+function gradeLabel(n){return['','1 · A+','2 · A','3 · B','4 · C'][n]||'—'}
+function trHTML(t){
+  const dc=t.dir==='BUY'?'buy':'sell';
+  const pc=(t.pnl||0)>=0?'pos':'neg',sg=(t.pnl||0)>=0?'+':'-';
+  const gl={'1':'g1','2':'g2','3':'g3','4':'g4'}[t.grade]||'';
+  const isPlan=t.planFomo==='plan';
+  const pfTag=isPlan?'<span style="background:rgba(43,213,90,.12);color:var(--green);font-size:9px;font-weight:800;padding:2px 5px;border-radius:4px;margin-left:5px">📋 Plan</span>':'<span style="background:rgba(255,56,48,.12);color:var(--red);font-size:9px;font-weight:800;padding:2px 5px;border-radius:4px;margin-left:5px">⚠️ FOMO</span>';
+  const d=new Date(t.date).toLocaleDateString('th-TH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const ordStr=t.orders&&t.orders.length>1?` · ${t.orders.length} ออเดอร์`:'';
+  return `<div class="trow" onclick="oTd('${t.id}')">
+    <div class="dpill ${dc}">${t.dir}</div>
+    <div class="tmeta">
+      <div class="tname">XAU/USD${pfTag}</div>
+      <div class="tsub">${d}${ordStr} · ${t.sess||'—'} · ${t.setup||'—'}${t.fibo&&t.fibo!=='none'?' · Fibo '+t.fibo+'%':''}</div>
+    </div>
+    ${t.grade?`<div class="gpill ${gl}">${t.grade}</div>`:''}
+    <div class="tpnl ${pc}">${t.result?sg+'$'+Math.abs(t.pnl||0).toFixed(2):'—'}</div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   EQUITY CHART
+═══════════════════════════════════════════ */
+function drawEq(pts){
+  const c=document.getElementById('eqc');if(!c)return;
+  const W=c.offsetWidth||380,H=88;
+  c.width=W*2;c.height=H*2;c.style.width=W+'px';c.style.height=H+'px';
+  const ctx=c.getContext('2d');ctx.scale(2,2);ctx.clearRect(0,0,W,H);
+  if(pts.length<2)return;
+  const mn=Math.min(...pts)*.9985,mx=Math.max(...pts)*1.0015,rng=mx-mn||1;
+  const py=v=>H-(((v-mn)/rng)*(H-18)+9),step=W/(pts.length-1);
+  const up=pts[pts.length-1]>=pts[0],col=up?'#2BD55A':'#FF3830';
+  const gr=ctx.createLinearGradient(0,0,0,H);
+  gr.addColorStop(0,up?'rgba(43,213,90,.2)':'rgba(255,56,48,.2)');
+  gr.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();pts.forEach((v,i)=>i===0?ctx.moveTo(0,py(v)):ctx.lineTo(i*step,py(v)));
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fillStyle=gr;ctx.fill();
+  ctx.beginPath();pts.forEach((v,i)=>i===0?ctx.moveTo(0,py(v)):ctx.lineTo(i*step,py(v)));
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+  [[0,pts[0]],[pts.length-1,pts[pts.length-1]]].forEach(([i,v])=>{
+    ctx.beginPath();ctx.arc(i*step,py(v),3.5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+  });
+}
+
+/* ═══════════════════════════════════════════
+   HISTORY
+═══════════════════════════════════════════ */
+function sf(f,el){
+  S.flt=f;
+  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');rHist();
+}
+function sh(q){S.srch=q.toLowerCase();rHist()}
+function rHist(){
+  let ts=[...S.trades];
+  if(S.flt==='win')ts=ts.filter(t=>t.result==='WIN');
+  else if(S.flt==='loss')ts=ts.filter(t=>t.result==='LOSS');
+  else if(S.flt==='be')ts=ts.filter(t=>t.result==='BE');
+  else if(S.flt==='buy')ts=ts.filter(t=>t.dir==='BUY');
+  else if(S.flt==='sell')ts=ts.filter(t=>t.dir==='SELL');
+  else if(S.flt==='fomo')ts=ts.filter(t=>t.planFomo==='fomo');
+  else if(S.flt==='plan')ts=ts.filter(t=>t.planFomo==='plan');
+  if(S.srch)ts=ts.filter(t=>
+    (t.notes||'').toLowerCase().includes(S.srch)||
+    (t.setup||'').toLowerCase().includes(S.srch)||
+    (t.sess||'').toLowerCase().includes(S.srch)||
+    (t.dir||'').toLowerCase().includes(S.srch)
+  );
+  g('hcount').textContent=ts.length+' รายการ';
+  const el=g('hlist');
+  if(!ts.length){el.innerHTML='<div class="mt"><div class="mtico">🔍</div><div class="mtttl">ไม่พบรายการ</div><div class="mtsub">ลองเปลี่ยน filter</div></div>';return}
+  const gr={};
+  ts.forEach(t=>{
+    const d=new Date(t.date).toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    if(!gr[d])gr[d]=[];gr[d].push(t);
+  });
+  el.innerHTML=Object.entries(gr).map(([d,arr])=>
+    `<div class="hdt">${d}</div>`+arr.map(t=>hcHTML(t)).join('')
+  ).join('');
+}
+function hcHTML(t){
+  const cls=t.result?(t.result==='WIN'?'win':t.result==='LOSS'?'loss':'be'):'';
+  const pc=(t.pnl||0)>=0?'var(--green)':'var(--red)',sg=(t.pnl||0)>=0?'+':'-';
+  const gl={'1':'g1','2':'g2','3':'g3','4':'g4'}[t.grade]||'';
+  const isPlan=t.planFomo==='plan';
+  const pTag=isPlan?'<span style="background:rgba(43,213,90,.12);color:var(--green);font-size:9px;font-weight:800;padding:2px 5px;border-radius:4px;margin-left:4px">Plan</span>':'<span style="background:var(--rd);color:var(--red);font-size:9px;font-weight:800;padding:2px 5px;border-radius:4px;margin-left:4px">FOMO</span>';
+  const ordStr=t.orders&&t.orders.length>1?` · ${t.orders.length} ออเดอร์`:'';
+  return `<div class="hcard ${cls}" onclick="oTd('${t.id}')">
+    <div class="dpill ${t.dir.toLowerCase()}">${t.dir}</div>
+    <div class="tmeta">
+      <div class="tname">XAU/USD${pTag}</div>
+      <div class="tsub">${t.sess||'—'} · ${t.setup||'—'}${t.fibo&&t.fibo!=='none'?' · Fibo '+t.fibo+'%':''}${ordStr} · R:R ${t.rr?t.rr.toFixed(2):'—'}</div>
+    </div>
+    ${t.grade?`<div class="gpill ${gl}">${t.grade}</div>`:''}
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:15px;font-weight:800;color:${pc};font-variant-numeric:tabular-nums">${t.result?sg+'$'+Math.abs(t.pnl||0).toFixed(2):'—'}</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:2px">${t.result||'เปิดอยู่'}</div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   TRADE DETAIL MODAL
+═══════════════════════════════════════════ */
+function oTd(id){
+  const t=S.trades.find(x=>x.id===id);if(!t)return;
+  const pc=(t.pnl||0)>0?'var(--green)':(t.pnl||0)<0?'var(--red)':'var(--t3)';
+  const sg=(t.pnl||0)>=0?'+':'-';
+  const ordHTML=t.orders&&t.orders.length>1?`
+    <div style="background:var(--bg3);border-radius:12px;padding:12px 16px;margin-bottom:10px">
+      <div style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Orders (${t.orders.length})</div>
+      ${t.orders.map((o,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--rim)">
+        <span style="font-size:12px;color:var(--t3)">#${i+1}</span>
+        <span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums">${o.e.toFixed(2)}</span>
+        <span style="font-size:12px;color:var(--t2)">${o.lot} lot</span>
+      </div>`).join('')}
+      <div style="display:flex;justify-content:space-between;padding:6px 0 0;margin-top:4px">
+        <span style="font-size:12px;font-weight:700;color:var(--t3)">Avg Entry</span>
+        <span style="font-size:14px;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums">${t.entry.toFixed(2)}</span>
+      </div>
+    </div>`:
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div style="background:var(--bg3);border-radius:12px;padding:12px"><div style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;margin-bottom:4px">Entry</div><div style="font-size:20px;font-weight:900;font-variant-numeric:tabular-nums">${t.entry.toFixed(2)}</div></div>
+      <div style="background:var(--bg3);border-radius:12px;padding:12px"><div style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;margin-bottom:4px">P&L</div><div style="font-size:20px;font-weight:900;color:${pc};font-variant-numeric:tabular-nums">${t.result?sg+'$'+Math.abs(t.pnl||0).toFixed(2):'—'}</div></div>
+    </div>`;
+  g('td-ttl').textContent=`${t.dir} XAU/USD`;
+  g('td-body').innerHTML=`
+    ${ordHTML}
+    <div style="background:var(--bg3);border-radius:12px;padding:12px 16px;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div><div style="font-size:10px;color:var(--t3);margin-bottom:4px">SL</div><div style="font-size:14px;font-weight:800;color:var(--red)">${t.sl}</div></div>
+        <div><div style="font-size:10px;color:var(--t3);margin-bottom:4px">R:R</div><div style="font-size:14px;font-weight:800;color:var(--gold)">${t.rr?t.rr.toFixed(2):'—'}</div></div>
+        <div><div style="font-size:10px;color:var(--t3);margin-bottom:4px">TP</div><div style="font-size:14px;font-weight:800;color:var(--green)">${t.tp}</div></div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);border-radius:12px;padding:12px 16px;margin-bottom:10px">
+      <div style="display:flex;flex-wrap:wrap;gap:7px 16px">
+        <div><span style="font-size:11px;color:var(--t3)">Session: </span><span style="font-size:13px;font-weight:700">${t.sess||'—'}</span></div>
+        <div><span style="font-size:11px;color:var(--t3)">Setup: </span><span style="font-size:13px;font-weight:700;color:var(--blue)">${t.setup||'—'}</span></div>
+        <div><span style="font-size:11px;color:var(--t3)">Fibo: </span><span style="font-size:13px;font-weight:700;color:var(--gold)">${t.fibo&&t.fibo!=='none'?t.fibo+'%':'—'}</span></div>
+        <div><span style="font-size:11px;color:var(--t3)">Grade: </span><span style="font-size:13px;font-weight:700">${gradeLabel(t.grade)}</span></div>
+        <div><span style="font-size:11px;color:var(--t3)">Lot: </span><span style="font-size:13px;font-weight:700">${t.lot} lot</span></div>
+        <div><span style="font-size:11px;color:var(--t3)">Risk: </span><span style="font-size:13px;font-weight:700">${(t.rPct||t.riskPct||0).toFixed?.(2)||'—'}%</span></div>
+        <div><span style="font-size:11px;color:var(--t3)">CL: </span><span style="font-size:13px;font-weight:700">${t.clScore||0}/${t.clMax||TCL}</span></div>
+        <div><span style="font-size:11px;color:var(--t3)">Mode: </span><span style="font-size:13px;font-weight:700;color:${t.planFomo==='plan'?'var(--green)':'var(--red)'}">${t.planFomo==='plan'?'📋 Plan':'⚠️ FOMO'}</span></div>
+        ${t.result?`<div><span style="font-size:11px;color:var(--t3)">P&L: </span><span style="font-size:13px;font-weight:700;color:${pc}">${sg}$${Math.abs(t.pnl||0).toFixed(2)}</span></div>`:''}
+      </div>
+    </div>
+    ${t.emos&&t.emos.length?`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;margin-bottom:6px">สภาวะจิตใจ</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.emos.map(e=>`<span style="background:var(--gd);color:var(--gold);padding:4px 10px;border-radius:16px;font-size:12px;font-weight:600">${e}</span>`).join('')}</div></div>`:''}
+    ${t.notes?`<div style="background:var(--bg3);border-radius:12px;padding:12px 16px;margin-bottom:10px"><div style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;margin-bottom:5px">บันทึก</div><div style="font-size:14px;line-height:1.6;color:var(--t2)">${t.notes}</div></div>`:''}
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button onclick="delT('${t.id}')" style="flex:1;padding:13px;background:var(--rd);color:var(--red);border-radius:var(--r2);font-size:14px;font-weight:700;border:1px solid rgba(255,56,48,.2)">🗑️ ลบ</button>
+      <button onclick="g('td-ov').classList.remove('on')" style="flex:2;padding:13px;background:var(--g2);color:var(--t1);border-radius:var(--r2);font-size:14px;font-weight:700">ปิด</button>
+    </div>`;
+  g('td-ov').classList.add('on');
+}
+function delT(id){
+  if(!confirm('ลบการเทรดนี้?'))return;
+  S.trades=S.trades.filter(t=>t.id!==id);sv();
+  g('td-ov').classList.remove('on');rDash();rHist();showT('🗑️ ลบแล้ว');
+}
+function cov(e,id){if(e.target.classList.contains('ov'))g(id).classList.remove('on')}
+
+/* ═══════════════════════════════════════════
+   ANALYTICS
+═══════════════════════════════════════════ */
+function rAn(){
+  const ts=S.trades,cl=ts.filter(t=>t.result);
+  const ws=cl.filter(t=>t.result==='WIN'),ls=cl.filter(t=>t.result==='LOSS');
+  const wr=cl.length?(ws.length/cl.length*100).toFixed(1):0;
+  const rl=ts.filter(t=>t.rr>0);
+  const avR=rl.length?(rl.reduce((s,t)=>s+t.rr,0)/rl.length).toFixed(2):0;
+  const gW=ws.reduce((s,t)=>s+(t.pnl||0),0);
+  const gL=Math.abs(ls.reduce((s,t)=>s+(t.pnl||0),0));
+  const pf=gL>0?(gW/gL).toFixed(2):ws.length>0?'∞':0;
+  let cu=0,mxS=0;cl.forEach(t=>{if(t.result==='WIN'){cu++;mxS=Math.max(mxS,cu)}else cu=0});
+  let bal=S.cfg.capital,pk=S.cfg.capital,dd=0;
+  [...ts].reverse().forEach(t=>{bal+=(t.pnl||0);pk=Math.max(pk,bal);dd=Math.max(dd,pk-bal)});
+  const ddP=S.cfg.capital>0?(dd/S.cfg.capital*100).toFixed(1):0;
+  g('k0').textContent=ts.length;g('k1').textContent=wr+'%';g('k2').textContent=avR;
+  g('k3').textContent=pf;g('k4').textContent=mxS;g('k5').textContent=ddP+'%';
+  rCal();rGr();rFibo();rStu();rSess();rBW();rEmo();rFomo();
+}
+
+function rCal(){
+  const mn=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  g('calttl').textContent=mn[S.calM]+' '+(S.calY+543);
+  g('cal-h').innerHTML=['อา','จ','อ','พ','พฤ','ศ','ส'].map(d=>`<div class="cdh">${d}</div>`).join('');
+  const fd=new Date(S.calY,S.calM,1).getDay(),dim=new Date(S.calY,S.calM+1,0).getDate();
+  const td=new Date(),tm={};
+  S.trades.forEach(t=>{const d=new Date(t.date);if(d.getFullYear()===S.calY&&d.getMonth()===S.calM){const k=d.getDate();if(!tm[k])tm[k]=[];tm[k].push(t)}});
+  let h='';for(let i=0;i<fd;i++)h+='<div class="cd"></div>';
+  for(let d=1;d<=dim;d++){
+    const ar=tm[d]||[],isT=td.getDate()===d&&td.getMonth()===S.calM&&td.getFullYear()===S.calY;
+    let c='cd';if(isT)c+=' today';
+    if(ar.length){const w=ar.filter(t=>t.result==='WIN').length,l=ar.filter(t=>t.result==='LOSS').length;c+=w>l?' win':l>w?' loss':' be'}
+    h+=`<div class="${c}">${d}${ar.length?'<div class="cdot"></div>':''}</div>`;
+  }
+  g('cal-b').innerHTML=h;
+}
+
+function rGr(){
+  const el=g('gr-bk'),ts=S.trades;
+  if(!ts.length){el.innerHTML='<div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div>';return}
+  const gd={1:0,2:0,3:0,4:0},co={1:'var(--green)',2:'var(--blue)',3:'var(--amber)',4:'var(--red)'},lb={1:'Grade 1 · A+',2:'Grade 2 · A',3:'Grade 3 · B',4:'Grade 4 · C'};
+  ts.forEach(t=>{if(t.grade&&gd[t.grade]!==undefined)gd[t.grade]++});
+  el.innerHTML=Object.entries(gd).map(([k,v])=>{
+    const p=ts.length?v/ts.length*100:0;
+    return`<div style="padding:4px 0 8px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="font-weight:700">${lb[k]}</span><span style="color:var(--t3)">${v} เทรด (${p.toFixed(0)}%)</span></div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:${p}%;background:${co[k]};border-radius:3px;transition:width .6s"></div></div></div>`;
+  }).join('');
+}
+
+function rFibo(){
+  const el=g('fibo-st'),cl=S.trades.filter(t=>t.result&&t.fibo&&t.fibo!=='none'&&t.fibo!=='');
+  if(!cl.length){el.innerHTML='<div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div>';return}
+  const lvs=['100','78.6','61.8','50'],co={'100':'var(--purple)','78.6':'var(--gold)','61.8':'var(--blue)','50':'var(--green)'};
+  const dt={};lvs.forEach(l=>dt[l]={tot:0,w:0,pnl:0});
+  cl.forEach(t=>{if(dt[t.fibo]){dt[t.fibo].tot++;if(t.result==='WIN')dt[t.fibo].w++;dt[t.fibo].pnl+=(t.pnl||0)}});
+  let bL='',bW=-1;lvs.forEach(l=>{if(dt[l].tot>0){const w=dt[l].w/dt[l].tot;if(w>bW){bW=w;bL=l}}});
+  el.innerHTML=lvs.filter(l=>dt[l].tot>0).map(l=>{
+    const d=dt[l],wr=d.tot?(d.w/d.tot*100).toFixed(0):0,pc=d.pnl>=0?'var(--green)':'var(--red)';
+    return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--rim)">
+      <div style="background:${co[l]}22;color:${co[l]};padding:5px 12px;border-radius:20px;font-size:13px;font-weight:800;min-width:58px;text-align:center">${l}%</div>
+      <div style="flex:1"><div style="font-size:11px;color:var(--t3);margin-bottom:4px">${d.tot} เทรด${l===bL?' 🏆':''}</div><div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${wr}%;background:${co[l]};border-radius:3px"></div></div></div>
+      <div style="text-align:right;min-width:52px"><div style="font-size:16px;font-weight:900">${wr}%</div><div style="font-size:11px;color:${pc};font-weight:700">${d.pnl>=0?'+':''}$${d.pnl.toFixed(0)}</div></div>
+    </div>`;
+  }).join('')||'<div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div>';
+}
+
+function rStu(){
+  const el=g('set-st'),cl=S.trades.filter(t=>t.result&&t.setup);
+  if(!cl.length){el.innerHTML='<div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div>';return}
+  const tp=['CHoCH','EMAX','W'],lb={CHoCH:'CHoCH',EMAX:'EMAX & Demand/Supply',W:'Price Action'},co={CHoCH:'var(--blue)',EMAX:'var(--green)',W:'var(--gold)'};
+  const dt={};tp.forEach(k=>dt[k]={tot:0,w:0,pnl:0});
+  cl.forEach(t=>{if(dt[t.setup]){dt[t.setup].tot++;if(t.result==='WIN')dt[t.setup].w++;dt[t.setup].pnl+=(t.pnl||0)}});
+  el.innerHTML=tp.filter(k=>dt[k].tot>0).map(k=>{
+    const d=dt[k],wr=d.tot?(d.w/d.tot*100).toFixed(0):0,pc=d.pnl>=0?'var(--green)':'var(--red)';
+    return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--rim)">
+      <div style="background:${co[k]}22;color:${co[k]};padding:5px 10px;border-radius:20px;font-size:11px;font-weight:800;min-width:70px;text-align:center">${lb[k]}</div>
+      <div style="flex:1"><div style="font-size:11px;color:var(--t3);margin-bottom:4px">${d.tot} เทรด</div><div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${wr}%;background:${co[k]};border-radius:3px"></div></div></div>
+      <div style="text-align:right;min-width:52px"><div style="font-size:16px;font-weight:900">${wr}%</div><div style="font-size:11px;color:${pc};font-weight:700">${d.pnl>=0?'+':''}$${d.pnl.toFixed(0)}</div></div>
+    </div>`;
+  }).join('')||'<div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div>';
+}
+
+function rSess(){
+  const el=g('sess-st'),cl=S.trades.filter(t=>t.result);
+  if(!cl.length){el.innerHTML='<div class="mt" style="padding:24px 0"><div style="color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div>';return}
+  const sm={};cl.forEach(t=>{const s=t.sess||'ไม่ระบุ';if(!sm[s])sm[s]={tot:0,w:0,pnl:0};sm[s].tot++;if(t.result==='WIN')sm[s].w++;sm[s].pnl+=(t.pnl||0)});
+  el.innerHTML=Object.entries(sm).map(([s,d])=>{
+    const wr=(d.w/d.tot*100).toFixed(0),pc=d.pnl>=0?'var(--green)':'var(--red)';
+    return`<div style="display:flex;align-items:center;padding:12px 0;gap:12px;border-bottom:1px solid var(--rim)">
+      <div style="flex:1"><div style="font-size:14px;font-weight:700">${s}</div><div style="font-size:12px;color:var(--t3);margin-top:2px">${d.tot} เทรด · Win ${wr}%</div></div>
+      <div style="font-size:15px;font-weight:800;color:${pc};font-variant-numeric:tabular-nums">${d.pnl>=0?'+':''}$${d.pnl.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+}
+
+function rBW(){
+  const cl=S.trades.filter(t=>t.result&&t.pnl!=null);
+  const noD='<div class="mt" style="padding:24px 0"><div style="color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div></div>';
+  if(!cl.length){g('best-st').innerHTML=noD;g('worst-st').innerHTML=noD;return}
+  const bwH=(ls,wst)=>ls.map((t,i)=>{
+    const pc=wst?'var(--red)':'var(--green)',sg=(t.pnl||0)>=0?'+':'-';
+    const d=new Date(t.date).toLocaleDateString('th-TH',{month:'short',day:'numeric'});
+    return`<div style="display:flex;align-items:center;padding:11px 0;gap:12px;border-bottom:1px solid var(--rim)">
+      <div style="width:26px;height:26px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--t3)">${i+1}</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:700">${t.dir} · ${t.sess||'—'}</div><div style="font-size:11px;color:var(--t3);margin-top:2px">${d} · ${t.setup||'—'} · Grade ${gradeLabel(t.grade)}</div></div>
+      <div style="font-size:15px;font-weight:800;color:${pc};font-variant-numeric:tabular-nums">${sg}$${Math.abs(t.pnl||0).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+  const sr=[...cl].sort((a,b)=>(b.pnl||0)-(a.pnl||0));
+  g('best-st').innerHTML=bwH(sr.slice(0,3),false)||noD;
+  g('worst-st').innerHTML=bwH(sr.slice(-3).reverse(),true)||noD;
+}
+
+function rEmo(){
+  const el=g('emo-st'),em={};
+  S.trades.forEach(t=>(t.emos||[]).forEach(e=>{em[e]=(em[e]||0)+1}));
+  if(!Object.keys(em).length){el.innerHTML='<div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div>';return}
+  const mx=Math.max(...Object.values(em));
+  el.innerHTML=Object.entries(em).sort((a,b)=>b[1]-a[1]).map(([e,c])=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--rim)">
+      <div style="font-size:13px;font-weight:600;min-width:74px">${e}</div>
+      <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${c/mx*100}%;background:var(--gold);border-radius:3px;transition:width .5s"></div></div>
+      <div style="font-size:12px;font-weight:700;color:var(--t3);min-width:20px;text-align:right">${c}</div>
+    </div>`).join('');
+}
+
+function rFomo(){
+  const el=g('fomo-st'),tot=S.trades.length;
+  if(!tot){el.innerHTML='<div style="text-align:center;color:var(--t3);font-size:13px">ยังไม่มีข้อมูล</div>';return}
+  const fm=S.trades.filter(t=>t.planFomo==='fomo'),pl=S.trades.filter(t=>t.planFomo!=='fomo');
+  const fCl=fm.filter(t=>t.result),pCl=pl.filter(t=>t.result);
+  const fWR=fCl.length?(fm.filter(t=>t.result==='WIN').length/fCl.length*100).toFixed(0):'N/A';
+  const pWR=pCl.length?(pl.filter(t=>t.result==='WIN').length/pCl.length*100).toFixed(0):'N/A';
+  const fP=fm.reduce((s,t)=>s+(t.pnl||0),0),pP=pl.reduce((s,t)=>s+(t.pnl||0),0);
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left">
+      <div style="background:var(--rd);border-radius:12px;padding:13px">
+        <div style="font-size:10px;font-weight:800;color:var(--red);letter-spacing:1px;margin-bottom:5px">⚠️ FOMO</div>
+        <div style="font-size:11px;color:var(--t3)">${fm.length} เทรด</div>
+        <div style="font-size:20px;font-weight:900;margin:4px 0">WR ${fWR}%</div>
+        <div style="font-size:13px;font-weight:700;color:${fP>=0?'var(--green)':'var(--red)'}">${fP>=0?'+':''}$${fP.toFixed(2)}</div>
+      </div>
+      <div style="background:var(--gnd);border-radius:12px;padding:13px">
+        <div style="font-size:10px;font-weight:800;color:var(--green);letter-spacing:1px;margin-bottom:5px">📋 Plan</div>
+        <div style="font-size:11px;color:var(--t3)">${pl.length} เทรด</div>
+        <div style="font-size:20px;font-weight:900;margin:4px 0">WR ${pWR}%</div>
+        <div style="font-size:13px;font-weight:700;color:${pP>=0?'var(--green)':'var(--red)'}">${pP>=0?'+':''}$${pP.toFixed(2)}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--t3);text-align:center">FOMO ${(fm.length/tot*100).toFixed(1)}% ของเทรดทั้งหมด</div>`;
+}
+
+/* ═══════════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════════ */
+function rSet(){
+  const c=S.cfg;let bal=c.capital;S.trades.forEach(t=>bal+=(t.pnl||0));
+  g('acc-n').textContent=c.name||'อ๊อฟ';
+  g('acc-b').textContent='$'+bal.toFixed(2);
+  g('acc-t').textContent=S.trades.length+' เทรด';
+  const f=S.trades[S.trades.length-1];
+  g('acc-s').textContent=f?new Date(f.date).toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'}):'—';
+  g('sv-n').textContent=c.name;
+  g('sv-c').textContent='$'+Number(c.capital).toLocaleString();
+  g('sv-r').textContent=c.risk+'%';
+  g('sv-m').textContent=c.minrr+'R';
+  g('sv-d').textContent=c.dailyloss+'%';
+}
+let _sk=null;
+function es(k){
+  _sk=k;
+  const lb={name:'ชื่อเทรดเดอร์',capital:'เงินทุนเริ่มต้น ($)',risk:'Risk ต่อเทรด (%)',minrr:'Min R:R',dailyloss:'Daily Loss (%)'};
+  const tp={name:'text',capital:'number',risk:'number',minrr:'number',dailyloss:'number'};
+  g('set-ttl').textContent=lb[k]||k;
+  g('set-body').innerHTML=`<input id="si" type="${tp[k]||'text'}" value="${S.cfg[k]}" style="width:100%;background:var(--bg3);border:1px solid var(--rim2);border-radius:var(--r2);padding:16px;font-size:20px;font-weight:800;color:var(--t1);outline:none;text-align:center;font-family:var(--f)" inputmode="${tp[k]==='number'?'decimal':'text'}" autofocus>`;
+  g('set-ov').classList.add('on');
+  setTimeout(()=>{const si=document.getElementById('si');if(si)si.focus()},300);
+}
+function svSet(){
+  const inp=document.getElementById('si');if(!inp||!_sk)return;
+  let v=inp.value.trim();
+  if(['capital','risk','minrr','dailyloss'].includes(_sk))v=parseFloat(v);
+  S.cfg[_sk]=v;sv();g('set-ov').classList.remove('on');rSet();rDash();showT('✅ บันทึกแล้ว');
+}
+
+/* ═══════════════════════════════════════════
+   EXPORT / IMPORT
+═══════════════════════════════════════════ */
+function xport(){
+  const b=new Blob([JSON.stringify({trades:S.trades,cfg:S.cfg,exported:new Date().toISOString()},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download=`sniper-aof-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(a.href);showT('📤 Export สำเร็จ!');
+}
+function trigImp(){document.getElementById('imp-f').click()}
+function hImp(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.trades)S.trades=d.trades;
+      if(d.cfg)S.cfg={...S.cfg,...d.cfg};
+      sv();rDash();rSet();showT('📥 Import '+S.trades.length+' รายการ');
+    }catch{showT('❌ ไฟล์ไม่ถูกต้อง')}
+  };
+  r.readAsText(f);e.target.value='';
+}
+function clrAll(){
+  if(!confirm('⚠️ ลบข้อมูลทั้งหมด?'))return;
+  S.trades=[];sv();rDash();rHist();rAn();rSet();showT('🗑️ ล้างแล้ว');
+}
+
+/* ═══════════════════════════════════════════
+   AI ANALYSIS
+═══════════════════════════════════════════ */
+let _aiScope = 'all';
+
+function setAiScope(el){
+  document.querySelectorAll('.aiscope').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  _aiScope = el.dataset.s;
+}
+
+function buildSummary(){
+  // Filter trades by scope
+  const now = new Date();
+  let trades = [...S.trades];
+  if(_aiScope==='week'){
+    const d=new Date(now);d.setDate(now.getDate()-7);
+    trades=trades.filter(t=>new Date(t.date)>=d);
+  } else if(_aiScope==='month'){
+    const d=new Date(now);d.setDate(now.getDate()-30);
+    trades=trades.filter(t=>new Date(t.date)>=d);
+  } else if(_aiScope==='fomo'){
+    trades=trades.filter(t=>t.planFomo==='fomo');
+  } else if(_aiScope==='loss'){
+    trades=trades.filter(t=>t.result==='LOSS');
+  }
+
+  if(!trades.length) return null;
+
+  const cl=trades.filter(t=>t.result);
+  const ws=cl.filter(t=>t.result==='WIN');
+  const ls=cl.filter(t=>t.result==='LOSS');
+  const wr=cl.length?(ws.length/cl.length*100).toFixed(1):0;
+  const rl=trades.filter(t=>t.rr>0);
+  const avgRR=rl.length?(rl.reduce((s,t)=>s+t.rr,0)/rl.length).toFixed(2):0;
+  const totalPnL=trades.reduce((s,t)=>s+(t.pnl||0),0).toFixed(2);
+  const gW=ws.reduce((s,t)=>s+(t.pnl||0),0);
+  const gL=Math.abs(ls.reduce((s,t)=>s+(t.pnl||0),0));
+  const pf=gL>0?(gW/gL).toFixed(2):'∞';
+  const fomo=trades.filter(t=>t.planFomo==='fomo');
+  const fomoWS=fomo.filter(t=>t.result==='WIN');
+  const plan=trades.filter(t=>t.planFomo==='plan');
+  const planWS=plan.filter(t=>t.result==='WIN');
+  const fomoWR=fomo.filter(t=>t.result).length?(fomoWS.length/fomo.filter(t=>t.result).length*100).toFixed(0):0;
+  const planWR=plan.filter(t=>t.result).length?(planWS.length/plan.filter(t=>t.result).length*100).toFixed(0):0;
+
+  // Setup breakdown
+  const setups={};
+  trades.forEach(t=>{if(t.setup){if(!setups[t.setup])setups[t.setup]={tot:0,w:0,pnl:0};setups[t.setup].tot++;if(t.result==='WIN')setups[t.setup].w++;setups[t.setup].pnl+=(t.pnl||0)}});
+  const setupStr=Object.entries(setups).map(([k,v])=>`${k}: ${v.tot} เทรด WR ${v.tot?(v.w/v.tot*100).toFixed(0):0}% P&L $${v.pnl.toFixed(0)}`).join(', ');
+
+  // Fibo breakdown
+  const fibs={};
+  trades.forEach(t=>{if(t.fibo&&t.fibo!=='none'){if(!fibs[t.fibo])fibs[t.fibo]={tot:0,w:0};fibs[t.fibo].tot++;if(t.result==='WIN')fibs[t.fibo].w++;}});
+  const fiboStr=Object.entries(fibs).map(([k,v])=>`Fibo ${k}%: ${v.tot} ครั้ง WR ${v.tot?(v.w/v.tot*100).toFixed(0):0}%`).join(', ');
+
+  // Session breakdown
+  const sess={};
+  trades.forEach(t=>{const s=t.sess||'ไม่ระบุ';if(!sess[s])sess[s]={tot:0,w:0,pnl:0};sess[s].tot++;if(t.result==='WIN')sess[s].w++;sess[s].pnl+=(t.pnl||0)});
+  const sessStr=Object.entries(sess).map(([k,v])=>`${k}: WR ${v.tot?(v.w/v.tot*100).toFixed(0):0}% P&L $${v.pnl.toFixed(0)}`).join(', ');
+
+  // Emotion breakdown
+  const emos={};
+  trades.forEach(t=>(t.emos||[]).forEach(e=>{emos[e]=(emos[e]||0)+1}));
+  const emoStr=Object.entries(emos).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([e,c])=>`${e}(${c})`).join(', ');
+
+  // Streaks
+  let cur=0,maxW=0,maxL=0,curL=0;
+  cl.forEach(t=>{
+    if(t.result==='WIN'){cur++;maxW=Math.max(maxW,cur);curL=0}
+    else{curL++;maxL=Math.max(maxL,curL);cur=0}
+  });
+
+  return {
+    scope:_aiScope, total:trades.length, closed:cl.length,
+    wins:ws.length, losses:ls.length, wr, avgRR, totalPnL, pf,
+    fomo:{total:fomo.length,wr:fomoWR,pnl:fomo.reduce((s,t)=>s+(t.pnl||0),0).toFixed(2)},
+    plan:{total:plan.length,wr:planWR,pnl:plan.reduce((s,t)=>s+(t.pnl||0),0).toFixed(2)},
+    setupStr, fiboStr, sessStr, emoStr, maxW, maxL, capital:S.cfg.capital,
+  };
+}
+
+function buildPrompt(sum){
+  const scopeTH={'all':'ทั้งหมด','week':'7 วันล่าสุด','month':'30 วันล่าสุด','fomo':'เทรด FOMO','loss':'เทรดที่ขาดทุน'}[sum.scope]||sum.scope;
+  return `คุณคือโค้ชเทรด XAU/USD ระดับมืออาชีพ วิเคราะห์ข้อมูลการเทรดต่อไปนี้และให้คำแนะนำเป็นภาษาไทย (ตอบสั้นกระชับ ไม่เกิน 400 คำ)
+
+=== สถิติการเทรด (${scopeTH}) ===
+จำนวนเทรดทั้งหมด: ${sum.total} เทรด (ปิดแล้ว ${sum.closed})
+ชนะ: ${sum.wins} / แพ้: ${sum.losses} / Win Rate: ${sum.wr}%
+Avg R:R: ${sum.avgRR} | Profit Factor: ${sum.pf}
+P&L รวม: $${sum.totalPnL}
+Win Streak สูงสุด: ${sum.maxW} | Loss Streak สูงสุด: ${sum.maxL}
+ทุน: $${sum.capital}
+
+=== Plan vs FOMO ===
+Plan: ${sum.plan.total} เทรด | WR ${sum.plan.wr}% | P&L $${sum.plan.pnl}
+FOMO: ${sum.fomo.total} เทรด | WR ${sum.fomo.wr}% | P&L $${sum.fomo.pnl}
+
+=== Setup Performance ===
+${sum.setupStr||'ไม่มีข้อมูล'}
+
+=== Fibo Level ===
+${sum.fiboStr||'ไม่มีข้อมูล'}
+
+=== Session Performance ===
+${sum.sessStr||'ไม่มีข้อมูล'}
+
+=== สภาวะจิตใจบ่อยสุด ===
+${sum.emoStr||'ไม่มีข้อมูล'}
+
+กรุณาวิเคราะห์ใน 4 หัวข้อ:
+1. 💪 จุดแข็ง (สิ่งที่ทำได้ดี)
+2. ⚠️ จุดอ่อน (สิ่งที่ต้องแก้ไข)
+3. 🧠 พฤติกรรมและจิตวิทยา
+4. 🎯 คำแนะนำเฉพาะ (3 ข้อปฏิบัติที่ชัดเจน)`;
+}
+
+function renderAIResult(text, sum){
+  const sections = text.split(/(?=\d\. [💪⚠️🧠🎯])/u);
+  let html = '';
+
+  // Summary stats bar
+  const scopeTH={'all':'ข้อมูลทั้งหมด','week':'7 วันล่าสุด','month':'30 วันล่าสุด','fomo':'เทรด FOMO','loss':'เทรดที่ขาดทุน'}[sum.scope]||sum.scope;
+  g('ai-scope-label').textContent = scopeTH + ' · ' + sum.total + ' เทรด';
+
+  // helper: pick color from CSS var name (avoid nested quotes in template)
+  function wrColor(wr){ return wr>=55?'#2BD55A':wr>=45?'#FF9500':'#FF3830'; }
+  function rrColor(rr){ return rr>=2?'#2BD55A':rr>=1.5?'#FF9500':'#FF3830'; }
+  function pfColor(pf){ const n=parseFloat(pf); return n>=1.5?'#2BD55A':n>=1?'#FF9500':'#FF3830'; }
+  function pnlColor(v){ return parseFloat(v)>=0?'#2BD55A':'#FF3830'; }
+
+  html += '<div class="ai-section">';
+  html += '<div class="ai-section-ttl">📊 สรุปสถิติ</div>';
+  html += '<div class="ai-stat"><span class="ai-stat-k">Win Rate</span><span class="ai-stat-v" style="color:' + wrColor(sum.wr) + '">' + sum.wr + '%</span></div>';
+  html += '<div class="ai-stat"><span class="ai-stat-k">Avg R:R</span><span class="ai-stat-v" style="color:' + rrColor(parseFloat(sum.avgRR)) + '">' + sum.avgRR + '</span></div>';
+  html += '<div class="ai-stat"><span class="ai-stat-k">Profit Factor</span><span class="ai-stat-v" style="color:' + pfColor(sum.pf) + '">' + sum.pf + '</span></div>';
+  html += '<div class="ai-stat"><span class="ai-stat-k">Plan WR vs FOMO WR</span><span class="ai-stat-v"><span style="color:#2BD55A">' + sum.plan.wr + '%</span> <span style="color:#666;font-size:11px">vs</span> <span style="color:#FF3830">' + sum.fomo.wr + '%</span></span></div>';
+  html += '<div class="ai-stat"><span class="ai-stat-k">P&L รวม</span><span class="ai-stat-v" style="color:' + pnlColor(sum.totalPnL) + '">' + (parseFloat(sum.totalPnL)>=0?'+':'') + '$' + sum.totalPnL + '</span></div>';
+  html += '</div>';
+
+  // AI text sections
+  const icons = ['💪','⚠️','🧠','🎯'];
+  const colors = ['#2BD55A','#FF9500','#147EFF','#CFA94E'];
+  sections.forEach(function(sec) {
+    if(!sec.trim()) return;
+    const lines = sec.trim().split('\n').filter(function(l){return l.trim()});
+    const title = lines[0] || '';
+    const body = lines.slice(1).join('\n').trim();
+    const icon = icons.find(function(ic){return title.includes(ic)}) || '•';
+    const col = colors[icons.indexOf(icon)] || '#aaa';
+    const bodyHTML = body.split('\n').map(function(l){
+      const t = l.trim().replace(/^[-•]\s*/,'');
+      if(!t) return '';
+      return '<p class="ai-advice">' + t + '</p>';
+    }).join('');
+    html += '<div class="ai-section">';
+    html += '<div class="ai-section-ttl" style="color:' + col + '">' + title + '</div>';
+    html += bodyHTML;
+    html += '</div>';
+  });
+
+  // If no sections parsed, just show raw text
+  if(sections.length<=1 && text.trim()){
+    html += '<div class="ai-section"><div class="ai-block">' + text.replace(/\n/g,'<br>') + '</div></div>';
+  }
+
+  g('ai-result-body').innerHTML = html;
+}
+
+async function runAI(){
+  const sum = buildSummary();
+  if(!sum || sum.total === 0){
+    showT('⚠️ ไม่มีข้อมูลในช่วงที่เลือก');return;
+  }
+  const btn = g('ai-run-btn');
+  btn.disabled = true;
+  g('ai-btn-txt').textContent = 'กำลังวิเคราะห์...';
+  g('ai-result-body').innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;padding:40px 0;gap:14px"><div class="ai-spin"></div><div style="font-size:14px;color:var(--t3)">AI กำลังวิเคราะห์พฤติกรรมการเทรด...</div></div>`;
+  document.getElementById('ai-ov').classList.add('on');
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        messages:[{role:'user',content:buildPrompt(sum)}]
+      })
+    });
+    const data = await resp.json();
+    const text = (data.content||[]).map(b=>b.text||'').join('').trim();
+    if(!text) throw new Error('No response');
+    renderAIResult(text, sum);
+  }catch(err){
+    g('ai-result-body').innerHTML = `<div style="text-align:center;padding:30px 0"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-size:14px;color:var(--red);font-weight:700;margin-bottom:8px">ไม่สามารถเชื่อมต่อ AI ได้</div><div style="font-size:13px;color:var(--t3);line-height:1.55">${err.message||'กรุณาลองใหม่อีกครั้ง'}</div></div>`;
+  }finally{
+    btn.disabled=false;
+    g('ai-btn-txt').textContent='✨ เริ่มวิเคราะห์';
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+let _tt;
+function showT(m){
+  const el=g('toast');el.textContent=m;el.classList.add('on');
+  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('on'),2600);
+}
+
+/* ═══════════════════════════════════════════
+   UTIL
+═══════════════════════════════════════════ */
+function g(id){return document.getElementById(id)}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  ld();rDash();rSet();rCal();chkSess();
+  setInterval(chkSess,60000);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&g('set-ov')?.classList.contains('on'))svSet();
+  });
+  // Direction buttons already have onclick in HTML
+});
+</script>
